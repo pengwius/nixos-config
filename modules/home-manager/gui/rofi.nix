@@ -1,11 +1,19 @@
 {
   config,
+  pkgs,
   ...
 }:
 {
+  stylix.targets.rofi.enable = false;
+
   programs.rofi = {
     enable = true;
+    plugins = with pkgs; [
+      rofi-calc
+      rofi-emoji
+    ];
     extraConfig = {
+      modi = "drun,calc,emoji";
       show-icons = true;
     };
     theme =
@@ -14,6 +22,9 @@
       in
       {
         "*" = {
+          background-color = mkLiteral "#191724";
+          text-color = mkLiteral "#e0def4";
+          border-color = mkLiteral "#c4a7e7";
           border-radius = 10;
           width = 600;
           spacing = 8;
@@ -64,6 +75,16 @@
         "element" = {
           padding = mkLiteral "8px 10px";
           border-radius = 6;
+        };
+
+        "element selected" = {
+          background-color = mkLiteral "#c4a7e7";
+          text-color = mkLiteral "#191724";
+        };
+
+        "element-text, element-icon" = {
+          background-color = mkLiteral "inherit";
+          text-color = mkLiteral "inherit";
         };
       };
   };

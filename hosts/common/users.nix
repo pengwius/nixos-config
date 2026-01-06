@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
   users.users = {
-    snow = {
+    pengwius = {
       isNormalUser = true;
       shell = pkgs.zsh;
     };

@@ -16,7 +16,6 @@
     ../common/desktop.nix
     inputs.apple-silicon-support.nixosModules.apple-silicon-support
   ];
-
   # FIXME: Added for stremio installation, should care about it !!!!
   nixpkgs.config.permittedInsecurePackages = [
     "qtwebengine-5.15.19"
@@ -66,19 +65,25 @@
     enable = true;
   };
 
-  networking.hostName = "snow-nixos"; # Define your hostname.
+  services.logind = {
+    lidSwitch = "suspend";
+    lidSwitchExternalPower = "suspend";
+    powerKey = "suspend";
+  };
+
+  networking.hostName = "rysiek";
 
   networking = {
     networkmanager = {
       enable = true;
-      wifi.powersave = true;
+      wifi.powersave = false;
     };
   };
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
 
-  users.users.snow = {
+  users.users.pengwius = {
     extraGroups = [
       "wheel"
       "audio"
@@ -97,6 +102,7 @@
     podman-tui
     podman-compose
     light
+    iw
     inputs.noctalia.packages.${stdenv.hostPlatform.system}.default
   ];
 

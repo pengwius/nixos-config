@@ -6,6 +6,7 @@
   enableGui,
   ...
 }:
+
 {
   # You can import other home-manager modules here
   imports = [
@@ -37,8 +38,17 @@
     sops
     age
     devenv
-    claude-code
     lazydocker
+    telegram-desktop
+    obs-studio
+    bitwarden-desktop
+    file
+    wlr-randr
+    unzip
+    qbittorrent
+    brightnessctl
+    gh
+    moonlight-qt
   ];
 
   programs.direnv = {
@@ -49,8 +59,14 @@
   programs.git = {
     enable = true;
     settings.user = {
-      name = "SailorSnoW";
-      email = "sailorsnow@pm.me";
+      name = "pengwius";
+      email = "pengwius@protonmail.ch";
+    };
+  };
+  programs.gh = {
+    enable = true;
+    gitCredentialHelper = {
+      enable = true;
     };
   };
   programs.eza = {

@@ -20,15 +20,16 @@
       lg = "lazygit";
       vi = "nvim";
     };
+
+    initExtra = ''
+      open() {
+        nautilus "$@" > /dev/null 2>&1 &!
+      }
+    '';
     history = {
       expireDuplicatesFirst = true;
       save = 1000;
     };
-    initContent = ''
-      if command -v fastfetch >/dev/null 2>&1; then
-        fastfetch
-      fi
-    '';
   };
 
   programs.starship = {

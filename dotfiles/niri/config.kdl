@@ -2,7 +2,7 @@
 
 // Spawn at startup
 spawn-at-startup "noctalia-shell"
-spawn-at-startup "vesktop"
+// spawn-at-startup "vesktop"
 
 // Screenshot
 screenshot-path null
@@ -21,7 +21,6 @@ environment {
 
 // Debug settings
 debug {
-    render-drm-device "/dev/dri/renderD128"
     honor-xdg-activation-with-invalid-serial
 }
 
@@ -29,13 +28,12 @@ debug {
 input {
     keyboard {
         xkb {
-            layout "fr"
-            variant "mac"
-            options "eurosign:e,caps:escape"
+	    layout "pl"
+	    options "lv3:lalt_switch"
         }
-        repeat-delay 300
     }
     
+
     touchpad {
         dwt
         scroll-factor 0.3
@@ -46,6 +44,7 @@ input {
 
 cursor {
     hide-when-typing
+    xcursor-size 18
 }
 
 hotkey-overlay {
@@ -101,33 +100,40 @@ binds {
     XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_SINK@" "5%-"; }
     XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_SINK@" "5%+"; }
     XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_SINK@" "toggle"; }
+    XF86AudioPlay { spawn "playerctl" "play-pause"; }
+    XF86AudioPrev { spawn "playerctl" "previous"; }
+    XF86AudioNext { spawn "playerctl" "next"; }
     
     // General actions
     Mod+Q { close-window; }
     Mod+L { focus-column-right; }
     Mod+H { focus-column-left; }
-    Mod+Alt+H { move-column-left; }
-    Mod+Alt+L { move-column-right; }
-    Mod+Alt+F { toggle-window-floating; }
-    Mod+Alt+P { switch-preset-column-width; }
-    Mod+Alt+M { maximize-column; }
+    Mod+Shift+H { move-column-left; }
+    Mod+Shift+L { move-column-right; }
+    Mod+Shift+F { toggle-window-floating; }
+    Mod+Shift+P { switch-preset-column-width; }
+    Mod+Shift+M { maximize-column; }
     Mod+Shift+apostrophe { screenshot; }
     
     // Workspaces
     Mod+J { focus-workspace-down; }
     Mod+K { focus-workspace-up; }
-    Mod+Alt+J { move-window-to-workspace-down; }
-    Mod+Alt+K { move-window-to-workspace-up; }
+    Mod+Shift+J { move-window-to-workspace-down; }
+    Mod+Shift+K { move-window-to-workspace-up; }
     Mod+ampersand { focus-workspace 1; }
     Mod+eacute { focus-workspace 2; }
     Mod+quotedbl { focus-workspace 3; }
     Mod+apostrophe { focus-workspace 4; }
     Mod+parenleft { focus-workspace 5; }
     Mod+section { focus-workspace 6; }
-    
+
     // Sizing
-    Mod+Shift+Plus { set-column-width "+10%"; }
+    Mod+Shift+Equal { set-column-width "+10%"; }
     Mod+Minus { set-column-width "-10%"; }
+
+    // Mouse wheel workspace switching
+    Mod+WheelScrollDown      { focus-workspace-down; }
+    Mod+WheelScrollUp        { focus-workspace-up; }
     
     // Shortcuts
     Mod+T { spawn "ghostty"; }
@@ -184,4 +190,16 @@ window-rule {
     default-column-width { proportion 0.50; }
     min-height 500
     open-floating true
+}
+
+// Output configuration
+output "eDP-1" {
+    scale 1.75
+    position x=0 y=0
+}
+
+output "DP-1" {
+    mode "3440x1440@144.000"
+    position x=1463 y=0
+    scale 1.1
 }

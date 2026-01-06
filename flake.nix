@@ -1,5 +1,5 @@
 {
-  description = "SnoW NixOS configs";
+  description = "Pengwius (SnoW) NixOS configs";
 
   inputs = {
     # Nixpkgs
@@ -10,7 +10,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # Apple Silicon
-    apple-silicon-support.url = "github:tpwrules/nixos-apple-silicon";
+    apple-silicon-support.url = "path:./apple-silicon-support";
 
     # WSL
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
@@ -94,7 +94,7 @@
 
               home-manager.useUserPackages = true;
               home-manager.useGlobalPkgs = true;
-              home-manager.users.snow = import ./home-manager/home.nix;
+              home-manager.users.pengwius = import ./home-manager/home.nix;
             }
           ];
         };

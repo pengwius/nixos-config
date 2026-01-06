@@ -15,7 +15,7 @@
   # services.xserver.enable = true;
 
   # Configure keymap in X11
-  services.xserver.xkb.layout = "fr";
-  services.xserver.xkb.variant = "mac";
-  services.xserver.xkb.options = "eurosign:e,caps:escape";
+  # services.xserver.xkb.layout = "fr";
+  # services.xserver.xkb.variant = "mac";
+  # services.xserver.xkb.options = "eurosign:e,caps:escape";
 }

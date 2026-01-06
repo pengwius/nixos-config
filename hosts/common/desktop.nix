@@ -5,6 +5,17 @@
   environment.systemPackages = with pkgs; [
     brightnessctl
     pavucontrol
+    playerctl
+    (symlinkJoin {
+      name = "trezor-suite";
+      paths = [ trezor-suite ];
+      buildInputs = [ makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/trezor-suite \
+          --add-flags "--ozone-platform-hint=auto --enable-features=UseOzonePlatform --ozone-platform=wayland"
+      '';
+    })
+    sparrow
   ];
 
   fonts.packages = with pkgs; [
@@ -42,15 +53,17 @@
   };
 
   services = {
+    trezord.enable = true;
     greetd = {
       enable = true;
-      settings = rec {
-        initial_session = {
-          command = "${pkgs.niri}/bin/niri-session";
-          user = "snow";
+      settings = {
+        default_session = {
+          command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${pkgs.niri}/bin/niri-session";
+          user = "greeter";
         };
-        default_session = initial_session;
       };
     };
   };
+
+  security.pam.services.swaylock = {};
 }

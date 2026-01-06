@@ -5,7 +5,7 @@
     enable = true;
 
     profiles = {
-      snow = {
+      pengwius = {
         extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
           vimium
@@ -19,11 +19,11 @@
     };
   };
 
-  stylix.targets.firefox.profileNames = [ "snow" ];
+  stylix.targets.firefox.profileNames = [ "pengwius" ];
 
   textfox = {
     enable = true;
-    profile = "snow";
+    profile = "pengwius";
     # https://github.com/adriankarlen/textfox/pull/131
     useLegacyExtensions = false;
     config = {

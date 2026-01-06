@@ -48,6 +48,7 @@
     curl
     tmux
     fastfetch
+    hyfetch
     neovim
     unzip
     wget
@@ -55,6 +56,7 @@
     btop
   ];
   programs.zsh.enable = true;
+  programs.nix-ld.enable = true;
 
   services.logind.settings.Login.HandlePowerKey = "suspend";
 

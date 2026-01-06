@@ -5,6 +5,8 @@
     ./rofi.nix
     ./spotify-player.nix
     ./ghostty.nix
+    # ./vscode.nix vscode replace with zed
+    ./zed.nix
 
     ./niri
   ];
@@ -20,10 +22,10 @@
     vesktop
     wl-clipboard
     cliphist
-    # stremio
+    spotify-qt
+    librespot
   ];
 
-  # GTK
   gtk = {
     enable = true;
   };
