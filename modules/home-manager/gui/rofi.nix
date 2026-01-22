@@ -3,8 +3,19 @@
   pkgs,
   ...
 }:
+let
+  rofi-clipboard = pkgs.writeShellScriptBin "rofi-clipboard" ''
+    if [ -z "$@" ]; then
+      ${pkgs.cliphist}/bin/cliphist list
+    else
+      echo "$@" | ${pkgs.cliphist}/bin/cliphist decode | ${pkgs.wl-clipboard}/bin/wl-copy
+    fi
+  '';
+in
 {
   stylix.targets.rofi.enable = false;
+
+  home.packages = [ rofi-clipboard ];
 
   programs.rofi = {
     enable = true;
@@ -13,7 +24,7 @@
       rofi-emoji
     ];
     extraConfig = {
-      modi = "drun,calc,emoji";
+      modi = "drun,calc,emoji,clipboard:rofi-clipboard";
       show-icons = true;
     };
     theme =

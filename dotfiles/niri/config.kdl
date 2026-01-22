@@ -81,14 +81,14 @@ layout {
     }
 
     focus-ring {
-	off
+        off
     }
 
     shadow {
-	on
+        on
         draw-behind-window true
-	softness 15
-	spread 6
+    	softness 15
+    	spread 6
     }
 }
 
@@ -148,7 +148,7 @@ layer-rule {
 }
 
 layer-rule {
-    match namespace="^quickshell-overview$"
+    match namespace="^noctalia-overview$"
     place-within-backdrop true
 }
 

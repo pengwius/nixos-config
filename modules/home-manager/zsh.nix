@@ -19,6 +19,7 @@
       ls = "eza";
       lg = "lazygit";
       vi = "nvim";
+      zed = "zeditor";
     };
 
     initExtra = ''

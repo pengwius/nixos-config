@@ -103,6 +103,9 @@
     podman-compose
     light
     iw
+    libva-utils
+    vulkan-tools
+    mesa-demos
     inputs.noctalia.packages.${stdenv.hostPlatform.system}.default
   ];
 

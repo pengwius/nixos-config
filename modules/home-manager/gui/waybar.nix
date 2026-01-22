@@ -18,6 +18,7 @@
           "niri/window"
         ];
         modules-right = [
+          "custom/equalizer"
           "pulseaudio"
           "network"
           "cpu"
@@ -31,6 +32,12 @@
           format = "";
           tooltip = true;
           tooltip-format = "btw";
+        };
+
+        "custom/equalizer" = {
+          format = "";
+          tooltip = false;
+          on-click = "easyeffects";
         };
 
         "niri/workspaces" = {
@@ -180,6 +187,7 @@
       #network,
       #pulseaudio,
       #wireplumber,
+      #custom-equalizer,
       #custom-media,
       #tray,
       #mode,
@@ -202,6 +210,7 @@
       #network:hover,
       #pulseaudio:hover,
       #wireplumber:hover,
+      #custom-equalizer:hover,
       #custom-media:hover,
       #tray:hover,
       #mode:hover,

@@ -54,6 +54,7 @@
     wget
     direnv
     btop
+    home-manager
   ];
   programs.zsh.enable = true;
   programs.nix-ld.enable = true;

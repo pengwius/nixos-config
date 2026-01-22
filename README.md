@@ -8,6 +8,33 @@ This repository contains my personal NixOS configuration, primarily targeting Ap
 
 —
 
+## 🔐 Encryption (LUKS)
+
+This configuration is designed to work with **Full Disk Encryption (LUKS)**. 
+
+### 🆕 Fresh Install
+If you are installing from scratch using the Asahi Linux installer:
+1.  Boot into the NixOS installer (USB).
+2.  Manually partition and encrypt the disk before installing.
+    ```bash
+    # Example partitioning (adjust for your drive, e.g., nvme0n1p5)
+    cryptsetup luksFormat /dev/nvme0n1pX
+    cryptsetup luksOpen /dev/nvme0n1pX cryptroot
+    mkfs.ext4 /dev/mapper/cryptroot
+    mount /dev/mapper/cryptroot /mnt
+    # Don't forget to mount your existing ESP/Boot partition to /mnt/boot!
+    ```
+3.  Generate the hardware config to capture LUKS settings:
+    ```bash
+    nixos-generate-config --root /mnt
+    ```
+4.  Copy the `boot.initrd.luks.devices` section and file system UUIDs from the generated file into `hosts/asahi/hardware-configuration.nix` in this repo before installing.
+
+### 🔄 Migration (Existing System)
+If you already have a running system and want to enable encryption, you must **reinstall**, as you cannot encrypt a running partition in-place safely.
+
+—
+
 ## 🚀 Usage
 
 ### 💽 Deploy on the machine
@@ -19,25 +46,29 @@ git clone https://github.com/pengwius/nixos-config.git
 cd nixos-config
 ```
 
-2) Change partition UUIDs in `hosts/asahi/hardware-configuration.nix` to match your system
+2) Update Hardware Configuration
 
-```nix 
-fileSystems."/" = {
-  device = "/dev/disk/by-uuid/6ca13db7-eb93-4068-a533-1bcc0e258fe1";
-  fsType = "ext4";
-};
+You **must** update `hosts/asahi/hardware-configuration.nix` to match your disk's UUIDs.
 
-fileSystems."/boot" = {
-  device = "/dev/disk/by-uuid/40B2-1A23";
-  fsType = "vfat";
-  options = [
-    "fmask=0022"
-    "dmask=0022"
-  ];
-};
+**If using LUKS (Recommended):**
+You need to add the LUKS device mapping so the system can ask for the password at boot.
+
+```nix
+  boot.initrd.luks.devices."cryptroot".device = "/dev/disk/by-uuid/YOUR-PHYSICAL-PARTITION-UUID";
+
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/YOUR-LUKS-MAPPER-UUID"; # UUID of the decrypted filesystem
+    fsType = "ext4";
+  };
+
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/YOUR-ESP-UUID";
+    fsType = "vfat";
+    options = [ "fmask=0022" "dmask=0022" ];
+  };
 ```
 
-You can find the UUIDs by running `lsblk -f` or `blkid`.
+*Tip: Run `lsblk -f` or `blkid` to find these UUIDs.*
 
 3) Change usernames in 
  - `/flake.nix`

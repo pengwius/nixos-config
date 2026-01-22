@@ -19,12 +19,25 @@
 
   home.packages = with pkgs; [
     signal-desktop
-    vesktop
+    (symlinkJoin {
+      name = "vesktop";
+      paths = [ vesktop ];
+      buildInputs = [ makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/vesktop \
+          --add-flags "--ozone-platform-hint=auto --enable-features=UseOzonePlatform --ozone-platform=wayland"
+      '';
+    })
     wl-clipboard
-    cliphist
     spotify-qt
     librespot
+    easyeffects
   ];
+
+  services.cliphist = {
+    enable = true;
+    allowImages = true;
+  };
 
   gtk = {
     enable = true;

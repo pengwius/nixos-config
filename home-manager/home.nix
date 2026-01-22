@@ -48,7 +48,23 @@
     qbittorrent
     brightnessctl
     gh
-    moonlight-qt
+    (symlinkJoin {
+      name = "moonlight-qt";
+      paths = [ moonlight-qt ];
+      buildInputs = [ makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/moonlight \
+          --set QT_QPA_PLATFORM wayland \
+          --set SDL_VIDEODRIVER wayland
+      '';
+    })
+    python313
+    wl-screenrec
+    thunderbird
+    vlc
+    pitivi
+    ffmpeg
+    audacity
   ];
 
   programs.direnv = {
