@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   xdg = {
     enable = true;
@@ -19,49 +19,77 @@
     wev
   ];
 
-  stylix.targets.swaylock.enable = false;
-
-  programs.swaylock = {
+  programs.hyprlock = {
     enable = true;
-    settings = {
-      color = "1e1e2e";
-      font-size = 24;
-      indicator-idle-visible = false;
-      indicator-radius = 100;
-      show-failed-attempts = true;
+    settings = lib.mkForce {
+      general = {
+        no_fade_in = true;
+        grace = 0;
+        disable_loading_bar = true;
+      };
 
-      line-color = "1e1e2e";
-      inside-color = "1e1e2e";
-      ring-color = "313244"; # Surface0
-      
-      key-hl-color = "cba6f7"; # Mauve
-      bs-hl-color = "f38ba8"; # Red
-      separator-color = "1e1e2e";
-      
-      inside-ver-color = "1e1e2e";
-      ring-ver-color = "cba6f7"; # Mauve (Purple)
-      text-ver-color = "cdd6f4";
-      
-      inside-wrong-color = "1e1e2e";
-      ring-wrong-color = "f38ba8"; # Red
-      text-wrong-color = "cdd6f4";
-      
-      inside-clear-color = "1e1e2e";
-      ring-clear-color = "f5c2e7"; # Pink
-      text-clear-color = "cdd6f4";
-      
-      text-color = "cdd6f4";
-      layout-text-color = "cdd6f4";
+      background = [
+        {
+          path = "${../../../../home-manager/assets/wallpapers/lockscreen.png}";
+          blur_passes = 3;
+          blur_size = 8;
+        }
+      ];
+
+      input-field = [
+        {
+          size = "250, 60";
+          position = "0, -80";
+          monitor = "";
+          dots_center = true;
+          fade_on_empty = false;
+          font_color = "rgb(202, 211, 245)";
+          inner_color = "rgb(91, 96, 120)";
+          outer_color = "rgb(24, 25, 38)";
+          outline_thickness = 5;
+          placeholder_text = "<i>Password...</i>";
+          shadow_passes = 2;
+        }
+      ];
+
+      label = [
+        {
+          text = "$TIME";
+          color = "rgb(202, 211, 245)";
+          font_size = 100;
+          font_family = "FiraCode Nerd Font";
+          position = "0, 100";
+          halign = "center";
+          valign = "center";
+          shadow_passes = 2;
+        }
+      ];
     };
   };
 
   # Use native Niri config file instead of NixOS settings
   home.file.".config/niri/config.kdl".source = ../../../../dotfiles/niri/config.kdl;
 
-  services.swayidle = {
+  services.hypridle = {
     enable = true;
-    events = [
-      { event = "before-sleep"; command = "${pkgs.swaylock}/bin/swaylock -f"; }
-    ];
+    settings = {
+      general = {
+        lock_cmd = "pidof hyprlock || ${pkgs.hyprlock}/bin/hyprlock";
+        before_sleep_cmd = "loginctl lock-session";
+        after_sleep_cmd = "hyprctl dispatch dpms on";
+      };
+
+      listener = [
+        {
+          timeout = 900;
+          on-timeout = "loginctl lock-session";
+        }
+        {
+          timeout = 1200;
+          on-timeout = "hyprctl dispatch dpms off";
+          on-resume = "hyprctl dispatch dpms on";
+        }
+      ];
+    };
   };
 }
