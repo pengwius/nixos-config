@@ -46,7 +46,6 @@
     wlr-randr
     unzip
     qbittorrent
-    brightnessctl
     gh
     (symlinkJoin {
       name = "moonlight-qt";
@@ -62,7 +61,6 @@
     wl-screenrec
     thunderbird
     vlc
-    pitivi
     ffmpeg
     audacity
     kdePackages.kdenlive
