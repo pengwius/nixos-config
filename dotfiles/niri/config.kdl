@@ -32,13 +32,12 @@ input {
 	    options "lv3:lalt_switch"
         }
     }
-    
 
     touchpad {
         dwt
         scroll-factor 0.3
     }
-    
+
     focus-follows-mouse
 }
 
@@ -54,7 +53,7 @@ hotkey-overlay {
 // Layout configuration
 layout {
     gaps 15
-    
+
     struts {
         left -4
         right -4
@@ -64,16 +63,16 @@ layout {
 
     always-center-single-column
 
-    tab-indicator { 
+    tab-indicator {
     	hide-when-single-tab
     }
-    
+
     preset-column-widths {
         proportion 0.33333333
         proportion 0.5
         proportion 0.66666666
     }
-    
+
     border {
         width 2
         active-color "#c4a7e7"
@@ -86,7 +85,7 @@ layout {
 
     shadow {
         on
-        draw-behind-window true
+        draw-behind-window false
     	softness 15
     	spread 6
     }
@@ -103,7 +102,7 @@ binds {
     XF86AudioPlay { spawn "playerctl" "play-pause"; }
     XF86AudioPrev { spawn "playerctl" "previous"; }
     XF86AudioNext { spawn "playerctl" "next"; }
-    
+
     // General actions
     Mod+Q { close-window; }
     Mod+L { focus-column-right; }
@@ -114,7 +113,7 @@ binds {
     Mod+Shift+P { switch-preset-column-width; }
     Mod+Shift+M { maximize-column; }
     Mod+Shift+apostrophe { screenshot; }
-    
+
     // Workspaces
     Mod+J { focus-workspace-down; }
     Mod+K { focus-workspace-up; }
@@ -134,7 +133,7 @@ binds {
     // Mouse wheel workspace switching
     Mod+WheelScrollDown      { focus-workspace-down; }
     Mod+WheelScrollUp        { focus-workspace-up; }
-    
+
     // Shortcuts
     Mod+T { spawn "ghostty"; }
     Mod+B { spawn "ghostty" "-e" "btop"; }
@@ -156,6 +155,8 @@ layer-rule {
 window-rule {
     geometry-corner-radius 20
     clip-to-geometry true
+    draw-border-with-background false
+    opacity 0.9
 }
 
 window-rule {
