@@ -1,6 +1,7 @@
 # Module including all shared stuff for desktop GUI system compatible.
-{ pkgs, ... }:
+{ pkgs, inputs, config, lib, ... }:
 {
+  imports = [ inputs.silentSDDM.nixosModules.default ];
 
   environment.systemPackages = with pkgs; [
     brightnessctl
@@ -26,6 +27,11 @@
     enable = true;
     polarity = "dark";
     base16Scheme = "${pkgs.base16-schemes}/share/themes/rose-pine-moon.yaml";
+    cursor = {
+      package = pkgs.bibata-cursors;
+      name = "Bibata-Modern-Ice";
+      size = 48;
+    };
     opacity = {
       popups = 0.9;
     };
@@ -52,16 +58,31 @@
     };
   };
 
+  programs.silentSDDM = {
+    enable = true;
+    theme = "default";
+    backgrounds = {
+      lockscreen = ../../home-manager/assets/wallpapers/lockscreen.png;
+    };
+    settings = {
+      LoginScreen = {
+        background = "lockscreen.png";
+      };
+      LockScreen = {
+        background = "lockscreen.png";
+      };
+    };
+    profileIcons = {
+      pengwius = ../../home-manager/assets/wallpapers/1.png;
+    };
+  };
+
   services = {
     trezord.enable = true;
-    greetd = {
-      enable = true;
-      settings = {
-        default_session = {
-          command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${pkgs.niri}/bin/niri-session";
-          user = "greeter";
-        };
-      };
+    displayManager.sddm = {
+      enableHidpi = true;
+      extraPackages = [ pkgs.bibata-cursors ];
+      settings.General.GreeterEnvironment = lib.mkForce "QT_SCALE_FACTOR=2,QML2_IMPORT_PATH=${config.programs.silentSDDM.package'}/share/sddm/themes/silent/components/,QT_IM_MODULE=qtvirtualkeyboard";
     };
   };
 

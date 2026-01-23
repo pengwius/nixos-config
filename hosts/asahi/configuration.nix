@@ -23,7 +23,6 @@
 
   # Use the systemd-boot EFI boot loader.
   boot = {
-    consoleLogLevel = 0;
     kernelParams = [
       "zswap.enabled=1"
       "zswap.compressor=zstd"
@@ -65,10 +64,10 @@
     enable = true;
   };
 
-  services.logind = {
-    lidSwitch = "suspend";
-    lidSwitchExternalPower = "suspend";
-    powerKey = "suspend";
+  services.logind.settings.Login = {
+    HandleLidSwitch = "suspend";
+    HandleLidSwitchExternalPower = "suspend";
+    HandlePowerKey = "suspend";
   };
 
   networking.hostName = "rysiek";

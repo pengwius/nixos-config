@@ -65,6 +65,7 @@
     pitivi
     ffmpeg
     audacity
+    kdePackages.kdenlive
   ];
 
   programs.direnv = {
