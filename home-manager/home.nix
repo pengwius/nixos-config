@@ -66,25 +66,10 @@
     audacity
     kdePackages.kdenlive
     android-studio-tools
-    openjdk17
-    gradle
     kotlin
     android-tools
     xwayland
     scrcpy
-  ];
-
-  home.sessionVariables = {
-    JAVA_HOME = "${pkgs.openjdk17}";
-    ANDROID_HOME = "$HOME/Android/Sdk";
-    ANDROID_SDK_ROOT = "$HOME/Android/Sdk";
-    ANDROID_NDK_ROOT = "$HOME/Android/Sdk/ndk/29.0.14033849";
-  };
-
-  home.sessionPath = [
-    "$HOME/Android/Sdk/platform-tools"
-    "$HOME/Android/Sdk/build-tools/36.0.0"
-    "$HOME/Android/Sdk/cmdline-tools/latest/bin"
   ];
 
   programs.direnv = {
