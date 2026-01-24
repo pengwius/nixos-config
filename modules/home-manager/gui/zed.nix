@@ -10,6 +10,8 @@
       "material-icon-theme"
       "wakatime"
       "kdl"
+      "xml"
+      "kotlin"
     ];
 
     userSettings = lib.mkForce {
