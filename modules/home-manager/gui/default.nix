@@ -5,7 +5,7 @@
     ./rofi.nix
     ./spotify-player.nix
     ./ghostty.nix
-    # ./vscode.nix vscode replace with zed
+    # ./vscode.nix
     ./zed.nix
 
     ./niri

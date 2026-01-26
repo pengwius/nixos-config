@@ -7,7 +7,7 @@
       theme = "Rose Pine Moon";
       font-size = 12;
       font-family = "FiraCode Nerd Font Mono";
-      background-opacity = 0.8;
+      background-opacity = 1;
       background-blur = true;
 
       # Care on MacOS if false

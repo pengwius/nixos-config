@@ -1,5 +1,11 @@
 # Module including all shared stuff for desktop GUI system compatible.
-{ pkgs, inputs, config, lib, ... }:
+{
+  pkgs,
+  inputs,
+  config,
+  lib,
+  ...
+}:
 {
   imports = [ inputs.silentSDDM.nixosModules.default ];
 
@@ -33,7 +39,7 @@
       size = 48;
     };
     opacity = {
-      popups = 0.9;
+      popups = 0.98;
     };
     fonts = {
       serif = {
@@ -86,5 +92,5 @@
     };
   };
 
-  security.pam.services.swaylock = {};
+  security.pam.services.swaylock = { };
 }

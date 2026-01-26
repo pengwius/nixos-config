@@ -28,6 +28,16 @@
         command = "editor.action.outdentLines";
         when = "editorTextFocus && !editorReadonly";
       }
+      {
+        key = "ctrl+.";
+        command = "workbench.action.focusActiveEditorGroup";
+        when = "terminalFocus";
+      }
+      {
+        key = "ctrl+.";
+        command = "workbench.action.terminal.toggleTerminal";
+        when = "!terminalFocus";
+      }
     ];
   };
 }

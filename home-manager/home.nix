@@ -70,7 +70,14 @@
     android-tools
     xwayland
     scrcpy
+    jetbrains."idea-community-bin"
   ];
+
+  home.file.".config/JetBrains/IdeaIC2025.2/idea64.vmoptions".text = ''
+  -Dawt.toolkit.name=WLToolkit
+  -Xms128m
+  -Xmx750m
+  '';
 
   programs.direnv = {
     enable = true;
@@ -105,6 +112,7 @@
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "24.11";
+
   # Let home Manager install and manage itself.
   programs.home-manager.enable = true;
 }

@@ -146,6 +146,9 @@
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
+  programs.xwayland.enable = true;
+  services.xserver.enable = true;
+
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ 22 ]; # SSH port
   # networking.firewall.allowedUDPPorts = [ ... ];
