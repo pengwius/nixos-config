@@ -15,6 +15,8 @@
     ../common
     ../common/desktop.nix
     inputs.apple-silicon-support.nixosModules.apple-silicon-support
+
+    ./memory.nix
   ];
   # FIXME: Added for stremio installation, should care about it !!!!
   nixpkgs.config.permittedInsecurePackages = [
