@@ -24,7 +24,7 @@
       };
       vim_mode = true;
       ui_font_size = 16;
-      buffer_font_size = 16;
+      buffer_font_size = 14;
       project_panel = {
         dock = "left";
       };
