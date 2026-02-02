@@ -74,9 +74,9 @@
   ];
 
   home.file.".config/JetBrains/IdeaIC2025.2/idea64.vmoptions".text = ''
-  -Dawt.toolkit.name=WLToolkit
-  -Xms128m
-  -Xmx750m
+    -Dawt.toolkit.name=WLToolkit
+    -Xms128m
+    -Xmx2000m
   '';
 
   programs.direnv = {
