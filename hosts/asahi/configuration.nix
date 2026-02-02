@@ -35,6 +35,12 @@
     loader.efi.canTouchEfiVariables = false;
   };
 
+  boot.binfmt.emulatedSystems = [
+    "x86_64-linux"
+  ];
+
+  nixpkgs.config.allowUnsupportedSystem = true;
+
   hardware = {
     asahi = {
       peripheralFirmwareDirectory = ./firmware;
