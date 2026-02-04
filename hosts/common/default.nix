@@ -4,6 +4,7 @@
     ./boot.nix
     ./users.nix
     ./locale.nix
+    ./zfs.nix
   ];
 
   nix = {
@@ -21,8 +22,8 @@
       # Automate `nix store --optimise`
       auto-optimise-store = true;
     };
-
   };
+
   nixpkgs = {
     overlays = [
       # Add overlays your own flake exports (from overlays and pkgs dir):
@@ -69,8 +70,8 @@
     ANDROID_HOME = "/home/pengwius/Android/Sdk";
     ANDROID_SDK_ROOT = "/home/pengwius/Android/Sdk";
     ANDROID_NDK_ROOT = "/home/pengwius/Android/Sdk/ndk/29.0.14033849";
-
   };
+
   programs.zsh.enable = true;
   programs.nix-ld.enable = true;
 
