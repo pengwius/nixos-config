@@ -46,10 +46,7 @@
   };
 
   swapDevices = [
-    {
-      device = "/var/lib/swapfile";
-      size = 16 * 1024;
-    }
+    { device = "/dev/zvol/zroot/swap"; }
   ];
 
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";

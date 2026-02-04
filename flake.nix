@@ -95,7 +95,7 @@
                   # Desktop computer, so we need GUI stuff.
                   enableGui = true;
                 };
-                backupFileExtension = ".backn";
+                backupFileExtension = "backup";
               };
 
               home-manager.useUserPackages = true;
