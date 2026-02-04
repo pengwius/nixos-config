@@ -7,6 +7,7 @@
   zsh = import ./zsh.nix;
   streamrip = import ./streamrip.nix;
   btop = import ./btop.nix;
+  android-sdk = import ./android-sdk.nix;
 
   # Related Desktop apps requiring DestopManager and session
   gui = import ./gui;

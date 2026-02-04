@@ -18,6 +18,7 @@
     outputs.homeManagerModules.fastfetch
     outputs.homeManagerModules.yazi
     outputs.homeManagerModules.btop
+    outputs.homeManagerModules.android-sdk
   ]
   ++ lib.optionals enableGui [
     outputs.homeManagerModules.gui
