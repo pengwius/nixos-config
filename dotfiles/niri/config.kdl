@@ -175,11 +175,11 @@ window-rule {
     open-maximized true
 }
 
-window-rule {
-    match app-id="^(firefox)$"
-    open-on-workspace "browser"
-    open-maximized true
-}
+// window-rule {
+//     match app-id="^(firefox)$"
+//     open-on-workspace "browser"
+//     open-maximized true
+// }
 
 window-rule {
     match app-id="^(signal)$"
