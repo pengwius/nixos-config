@@ -27,7 +27,6 @@
     cava
     cowsay
     cargo
-    crush
     talosctl
     talhelper
     kubectl
@@ -39,38 +38,39 @@
     sops
     age
     devenv
-    lazydocker
-    telegram-desktop
-    obs-studio
-    bitwarden-desktop
+    # lazydocker
+    # telegram-desktop
+    # obs-studio
+    # bitwarden-desktop
     file
     wlr-randr
     unzip
-    qbittorrent
+    # qbittorrent
     gh
-    (symlinkJoin {
-      name = "moonlight-qt";
-      paths = [ moonlight-qt ];
-      buildInputs = [ makeWrapper ];
-      postBuild = ''
-        wrapProgram $out/bin/moonlight \
-          --set QT_QPA_PLATFORM wayland \
-          --set SDL_VIDEODRIVER wayland
-      '';
-    })
-    python313
-    wl-screenrec
-    thunderbird
-    vlc
-    ffmpeg
-    audacity
-    kdePackages.kdenlive
-    android-studio-tools
-    kotlin
-    android-tools
-    xwayland
-    scrcpy
-    jetbrains."idea-community-bin"
+    # (symlinkJoin {
+    #   name = "moonlight-qt";
+    #   paths = [ moonlight-qt ];
+    #   buildInputs = [ makeWrapper ];
+    #   postBuild = ''
+    #     wrapProgram $out/bin/moonlight \
+    #       --set QT_QPA_PLATFORM wayland \
+    #       --set SDL_VIDEODRIVER wayland
+    #   '';
+    # })
+    #python313
+    #wl-screenrec
+    #thunderbird
+    #vlc
+    #ffmpeg
+    #audacity
+    #kdePackages.kdenlive
+    #android-studio-tools
+    #kotlin
+    #android-tools
+    #xwayland
+    #scrcpy
+    #jetbrains."idea-community-bin"
+    parted
   ];
 
   home.file.".config/JetBrains/IdeaIC2025.2/idea64.vmoptions".text = ''

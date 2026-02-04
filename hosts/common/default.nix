@@ -55,10 +55,10 @@
     direnv
     btop
     home-manager
-    openjdk17
-    gradle
-    android-tools
-    android-studio-tools
+    # openjdk17
+    # gradle
+    # android-tools
+    # android-studio-tools
   ];
 
   environment.variables = {

@@ -22,7 +22,6 @@
           --add-flags "--ozone-platform-hint=auto --enable-features=UseOzonePlatform --ozone-platform=wayland"
       '';
     })
-    sparrow
   ];
 
   fonts.packages = with pkgs; [

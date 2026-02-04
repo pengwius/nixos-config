@@ -19,5 +19,17 @@
       "rd.udev.log_level=3"
       "udev.log_priority=3"
     ];
+
+    supportedFilesystems = [ "zfs" ];
+    zfs.package = pkgs.zfs_2_4;
+    #zfs.enable = true;
+    extraModulePackages = [
+      pkgs.zfs_2_4
+    ];
+    #zfs.forceImportRoot = true;
   };
+
+  nixpkgs.config.allowBroken = true;
+
+  networking.hostId = "abcdef12";
 }

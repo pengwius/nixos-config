@@ -21,14 +21,23 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" = {
-    device = "/dev/mapper/cryptroot";
-    fsType = "ext4";
+    #    device = "/dev/disk/by-uuid/492ba4ca-7e4d-4974-a27c-ae3a3a696c75";
+    #    fsType = "ext4";
+    device = "zroot/nixos";
+    fsType = "zfs";
+    #options = [ "zfsutil" ];
   };
 
-  boot.initrd.luks.devices."cryptroot".device = "/dev/disk/by-uuid/db80184c-8bb3-41f4-9810-74f72c0fc4be";
+  fileSystems."/home" = {
+    device = "zroot/nixos/home";
+    fsType = "zfs";
+    #options = [ "zfsutil" ];
+  };
+
+  #boot.initrd.luks.devices."cryptroot".device = "/dev/disk/by-uuid/db80184c-8bb3-41f4-9810-74f72c0fc4be";
 
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/B8DE-1B14";
+    device = "/dev/disk/by-uuid/796B-1719";
     fsType = "vfat";
     options = [
       "fmask=0022"
