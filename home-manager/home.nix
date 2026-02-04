@@ -38,14 +38,14 @@
     sops
     age
     devenv
-    # lazydocker
-    # telegram-desktop
-    # obs-studio
-    # bitwarden-desktop
+    lazydocker
+    telegram-desktop
+    obs-studio
+    bitwarden-desktop
     file
     wlr-randr
     unzip
-    # qbittorrent
+    qbittorrent
     gh
     # (symlinkJoin {
     #   name = "moonlight-qt";
@@ -57,19 +57,19 @@
     #       --set SDL_VIDEODRIVER wayland
     #   '';
     # })
-    #python313
+    python313
     #wl-screenrec
-    #thunderbird
-    #vlc
-    #ffmpeg
-    #audacity
-    #kdePackages.kdenlive
-    #android-studio-tools
-    #kotlin
-    #android-tools
-    #xwayland
-    #scrcpy
-    #jetbrains."idea-community-bin"
+    thunderbird
+    vlc
+    ffmpeg
+    audacity
+    android-studio-tools
+    kotlin
+    android-tools
+    xwayland
+    scrcpy
+    jetbrains.idea
+    nautilus
     parted
   ];
 
