@@ -1,95 +1,222 @@
 # ❄️ NixOS config
 
-This config is based on [@SailorSnow's](https://github.com/SailorSnoW) config, who did an amazing job with it. Thank you!
+This configuration is based on [@SailorSnow's](https://github.com/SailorSnoW) config. He did an amazing job with it - thank you!
 
-I am maindriving this config on Macbook Air M1 8/256. I included (at this time) experimental Asahi Linux branch with external display through USB-C working.
+This repository contains my personal NixOS configuration, primarily targeting Apple Silicon via Asahi Linux. Home Manager is integrated directly into the NixOS builds.
 
-This repository contains my personal NixOS configuration, primarily targeting Apple Silicon via Asahi Linux. Home Manager is integrated into NixOS builds.
+I am using this configuration as my daily driver on a MacBook Air M1 (8GB RAM / 256GB Storage). It currently includes the experimental Asahi Linux branch with working external display support via USB-C.
 
-—
+This configuration uses ZFS as the root filesystem along with ZRAM. This setup is extremely helpful for devices with limited RAM and storage.
 
-## 🔐 Encryption (LUKS)
-
-This configuration is designed to work with **Full Disk Encryption (LUKS)**. 
-
-### 🆕 Fresh Install
-If you are installing from scratch using the Asahi Linux installer:
-1.  Boot into the NixOS installer (USB).
-2.  Manually partition and encrypt the disk before installing.
-    ```bash
-    # Example partitioning (adjust for your drive, e.g., nvme0n1p5)
-    cryptsetup luksFormat /dev/nvme0n1pX
-    cryptsetup luksOpen /dev/nvme0n1pX cryptroot
-    mkfs.ext4 /dev/mapper/cryptroot
-    mount /dev/mapper/cryptroot /mnt
-    # Don't forget to mount your existing ESP/Boot partition to /mnt/boot!
-    ```
-3.  Generate the hardware config to capture LUKS settings:
-    ```bash
-    nixos-generate-config --root /mnt
-    ```
-4.  Copy the `boot.initrd.luks.devices` section and file system UUIDs from the generated file into `hosts/asahi/hardware-configuration.nix` in this repo before installing.
-
-### 🔄 Migration (Existing System)
-If you already have a running system and want to enable encryption, you must **reinstall**, as you cannot encrypt a running partition in-place safely.
+I will guide you through the entire installation process. Please note that these instructions **might not be complete**, as I wrote them from memory step-by-step and may have overlooked some details. If you encounter any issues, feel free to contact me on [Telegram](https://t.me/pengwius) or Matrix: `@pengwius:matrix.org`. I will be more than happy to help you and update the instructions.
 
 —
 
-## 🚀 Usage
+# Installing
 
-### 💽 Deploy on the machine
+## 0. Shrinking the macOS Partition
 
-1) Clone the repository
+If you no longer rely on macOS and want to shrink it as much as possible, use Disk Utility to do so manually. **Do not use the Asahi tool for this step**, as it reserves too much space for macOS and will not allow you to minimize the partition size fully.
+
+<div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+  <img src="screenshots/diskutility1.png" alt="Disk Utility 1" style="flex:1 1 320px; max-width:100px; height:auto; object-fit:contain;" />
+  <img src="screenshots/diskutility2.png" alt="Disk Utility 2" style="flex:1 1 320px; max-width:100px; height:auto; object-fit:contain;" />
+</div>
+
+## 1. Installing NixOS
+
+Follow the steps provided here: https://github.com/nix-community/nixos-apple-silicon/blob/main/docs/uefi-standalone.md.
+
+**However**, when creating the ext4 partition, only use **half** of the available free space. Leave the other half unallocated.
+
+You could alternatively use the entire space and shrink the ext4 partition later, but this is unnecessary unless your disk space is so limited that it cannot handle the initial system build (including the kernel). You may want to run `nix-collect-garbage -d` in the future after the system builds to free up disk space.
+
+## 2. Installing the Configuration
+
+Clone my configuration into your user home directory:
 
 ```bash
-git clone https://github.com/pengwius/nixos-config.git
-cd nixos-config
+git clone https://github.com/pengwius/nixos-config 
 ```
 
-2) Update Hardware Configuration
+Replace `pengwius` with your username in the following files:
+- `/flake.nix`
+- `/home-manager/home.nix`
+- `/hosts/asahi/configuration.nix`
+- `/hosts/common/users.nix`
+- `/modules/home-manager/gui/firefox.nix`
 
-You **must** update `hosts/asahi/hardware-configuration.nix` to match your disk's UUIDs.
-
-**If using LUKS (Recommended):**
-You need to add the LUKS device mapping so the system can ask for the password at boot.
+Update `fileSystems."/"` in `/hosts/asahi/hardware-configuration.nix` to:
 
 ```nix
-  boot.initrd.luks.devices."cryptroot".device = "/dev/disk/by-uuid/YOUR-PHYSICAL-PARTITION-UUID";
-
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/YOUR-LUKS-MAPPER-UUID"; # UUID of the decrypted filesystem
-    fsType = "ext4";
-  };
-
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/YOUR-ESP-UUID";
-    fsType = "vfat";
-    options = [ "fmask=0022" "dmask=0022" ];
-  };
+fileSystems."/" = {
+  device = "/dev/disk/by-uuid/<ext4 partition uuid>";
+  fsType = "ext4";
+};
 ```
 
-*Tip: Run `lsblk -f` or `blkid` to find these UUIDs.*
+Change the disk UUID in `fileSystems."/boot"` to match yours, and comment out `swapDevices` and `fileSystems."/home"`.
 
-3) Change usernames in 
- - `/flake.nix`
- - `/home-manager/home.nix`
- - `/hosts/asahi/configuration.nix`
- - `/hosts/common/users.nix`
- - `/modules/home-manager/gui/firefox.nix`
- 
- to match your desired username
+You can retrieve your UUID by running `lsblk -f` or `blkid`.
 
-4) Rebuild the system (Asahi host)
+Now, rebuild your system by running:
 
 ```bash
 sudo nixos-rebuild switch --flake .#asahi
 ```
 
-Optional: Home Manager only (ad‑hoc)
+This will likely take some time, as it needs to compile the entire kernel.
+Once complete, set a password for your user:
 
 ```bash
-home-manager switch --flake .#<username>@asahi
+passwd <your username>
 ```
+
+Finally, reboot your system.
+
+## 3. Creating the ZFS Partition
+
+Now, create the ZFS partition in the free space you left in Step 1.
+
+Run the following command:
+
+```bash
+sudo zpool create \
+  -o ashift=12 \
+  -O compression=zstd \
+  -O atime=off \
+  -O xattr=sa \
+  -O acltype=posixacl \
+  -O encryption=aes-256-gcm \
+  -O keyformat=passphrase \
+  -O keylocation=prompt \
+  zroot /dev/<your free partition (likely nvme0n1p6, but verify this yourself!)>
+```
+
+You will be prompted to enter a password to encrypt the filesystem.
+
+Next, create the ZFS datasets:
+
+```bash
+sudo zfs create zroot/nixos
+sudo zfs create zroot/nixos/home
+```
+
+And set up the mountpoints:
+
+```bash
+sudo zfs set mountpoint=legacy zroot/nixos
+sudo zfs set mountpoint=legacy zroot/nixos/home
+```
+
+## 4. Migrating the System from ext4 to ZFS
+
+First, mount the ZFS partition:
+
+```bash
+sudo mount -t zfs zroot/nixos /mnt
+```
+
+Copy the entire system to ZFS:
+
+```bash
+sudo rsync -aAXHv --numeric-ids \
+    --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} \
+    / /mnt
+```
+
+Then copy the home directory:
+
+```bash
+sudo rsync -aAXHv /home/ /mnt/home
+```
+
+## 5. Configuring the System on ZFS
+
+Chroot into the system on ZFS:
+
+```bash
+nixos-enter --root /mnt
+```
+
+Edit `/hosts/asahi/hardware-configuration.nix` in the config and update `fileSystems` to:
+
+```nix
+  fileSystems."/" = {
+   device = "zroot/nixos";
+   fsType = "zfs";
+ };
+
+ fileSystems."/home" = {
+   device = "zroot/nixos/home";
+   fsType = "zfs";
+ };
+```
+
+Mount the EFI partition:
+
+```bash
+mount /dev/nvme0n1p4 (Check which partition holds YOUR EFI!) /boot
+```
+
+Proceed with the rebuild:
+
+```bash
+nixos-rebuild boot --flake .#asahi
+```
+
+After this, exit the chroot and reboot the system. It should boot into the ZFS installation.
+
+## 6. Adding the ext4 Partition to the zpool
+
+Once booted into your fresh ZFS system, you may want to add the remaining ext4 partition to the pool to utilize the full disk space. There is no need to resize partitions; you can simply wipe the ext4 partition and add it to the zpool.
+
+Run:
+
+```bash
+sudo wipefs -a /dev/nvme0n1p5 (This might differ for you! Check carefully!)
+```
+
+And then:
+
+```bash
+sudo zpool add zroot /dev/nvme0n1p5
+```
+
+Verify that everything went correctly by running:
+
+```bash
+zpool list
+zfs list
+```
+
+## 7. Adding Swap
+
+To add swap, uncomment `swapDevices` in `/hosts/asahi/hardware-configuration.nix`, and create a ZFS Zvol for swap:
+
+```bash
+sudo zfs create -V 16G -b $(getconf PAGESIZE) -o compression=off -o logbias=throughput -o sync=always -o primarycache=metadata -o secondarycache=none zroot/swap
+```
+
+Format it as swap:
+
+```bash
+sudo mkswap /dev/zvol/zroot/swap
+```
+
+Enable it:
+
+```bash
+sudo swapon /dev/zvol/zroot/swap
+```
+
+Finally, rebuild the system:
+
+```bash
+sudo nixos-rebuild switch --flake .#asahi
+```
+
+Your NixOS Asahi setup on ZFS should now work perfectly!
 
 —
 
@@ -133,10 +260,10 @@ home-manager switch --flake .#<username>@asahi
 ## 🧩 Notable Choices
 
 - Wayland compositor: Niri (via `services.greetd` session)
-- Stylix for theming and fonts
-- Podman (Docker‑compat) enabled with DNS for compose
-- Bluetooth via BlueZ + Blueman
-- Home Manager modules for Zsh, Neovim (nixCats), GUI apps (Firefox, Ghostty, etc.)
+- Stylix: Used for theming and fonts
+- Podman: Enabled (Docker‑compat) with DNS for compose
+- Bluetooth: Via BlueZ + Blueman
+- Home Manager modules: Zsh, Neovim (nixCats), GUI apps (Firefox, Ghostty, etc.)
 
 —
 
