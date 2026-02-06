@@ -8,6 +8,10 @@
     priority = 100;
   };
 
+  boot.kernelParams = [
+    "zfs.zfs_arc_max=2147483648" # 2 GB
+  ];
+
   boot.kernel.sysctl = {
     "vm.swappiness" = 140;
     "vm.page-cluster" = 0;
