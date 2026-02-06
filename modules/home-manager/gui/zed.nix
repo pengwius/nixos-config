@@ -44,6 +44,12 @@
       {
         context = "Editor";
         bindings = {
+          "ctrl-c" = "editor::Copy";
+          "ctrl-v" = "editor::Paste";
+          "ctrl-x" = "editor::Cut";
+          "ctrl-z" = "editor::Undo";
+          "ctrl-y" = "editor::Redo";
+          "ctrl-a" = "editor::SelectAll";
           "super-[" = "editor::Outdent";
           "super-]" = "editor::Indent";
           "ctrl-." = "terminal_panel::ToggleFocus";
@@ -52,6 +58,10 @@
       {
         context = "Terminal";
         bindings = {
+          "ctrl-c" = "terminal::Copy";
+          "ctrl-shift-c" = ["terminal::SendKeystroke" "ctrl-c"];
+          "ctrl-v" = "terminal::Paste";
+          "ctrl-a" = "terminal::SelectAll";
           "ctrl-." = "terminal_panel::ToggleFocus";
         };
       }

@@ -30,6 +30,13 @@
       click-repeat-interval = 0;
 
       confirm-close-surface = false;
+
+      keybind = [
+        "ctrl+c=copy_to_clipboard"
+        "ctrl+v=paste_from_clipboard"
+        "ctrl+a=select_all"
+        "ctrl+shift+c=text:\\x03"
+      ];
     };
   };
 }
