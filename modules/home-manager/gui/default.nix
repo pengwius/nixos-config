@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   imports = [
     ./firefox.nix
@@ -41,6 +41,15 @@
 
   gtk = {
     enable = true;
+    iconTheme = {
+      package = pkgs.papirus-icon-theme;
+      name = "Papirus-Dark";
+    };
+  };
+
+  home.sessionVariables = {
+    QS_ICON_THEME = "Papirus-Dark";
+    QT_QPA_PLATFORMTHEME = lib.mkForce "gtk3";
   };
 
   xdg.configFile."gtk-3.0/gtk.css".force = true;

@@ -83,6 +83,7 @@
   };
 
   services = {
+    upower.enable = true;
     trezord.enable = true;
     displayManager.sddm = {
       enableHidpi = true;

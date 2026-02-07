@@ -2,7 +2,6 @@
 
 // Spawn at startup
 spawn-at-startup "noctalia-shell"
-// spawn-at-startup "vesktop"
 
 // Screenshot
 screenshot-path null
@@ -138,7 +137,7 @@ binds {
     Mod+T { spawn "ghostty"; }
     Mod+B { spawn "ghostty" "-e" "btop"; }
     Mod+F { spawn "ghostty" "-e" "yazi"; }
-    Mod+space { spawn "rofi" "-show" "drun"; }
+    Mod+space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
 }
 
 
