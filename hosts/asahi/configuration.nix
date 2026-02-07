@@ -114,6 +114,7 @@
     vulkan-tools
     mesa-demos
     inputs.noctalia.packages.${stdenv.hostPlatform.system}.default
+    libqalculate
   ];
 
   services = {
