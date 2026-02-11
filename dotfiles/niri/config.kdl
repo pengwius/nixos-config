@@ -166,6 +166,7 @@ window-rule {
 window-rule {
     match app-id="^com.mitchellh.ghostty$"
     open-floating true
+    opacity 0.96
 }
 
 window-rule {
