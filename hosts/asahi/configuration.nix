@@ -14,7 +14,7 @@
     ./hardware-configuration.nix
     ../common
     ../common/desktop.nix
-    inputs.apple-silicon-support.nixosModules.apple-silicon-support
+    ../../apple-silicon-support/modules
 
     ./memory.nix
   ];
@@ -29,7 +29,7 @@
       "zswap.enabled=1"
       "zswap.compressor=zstd"
       "zswap.zpool=zsmalloc"
-      "zswap.max_pool_percent=50"
+      #"zswap.max_pool_percent=50"
       "apple_dcp.show_notch=1"
     ];
     loader.efi.canTouchEfiVariables = false;
@@ -60,7 +60,7 @@
   };
 
   hardware.graphics.package =
-    assert pkgs.mesa.version == "25.3.4";
+    assert pkgs.mesa.version == "26.0.0";
     pkgs.mesa;
 
   powerManagement = {
@@ -152,6 +152,11 @@
 
   programs.xwayland.enable = true;
   services.xserver.enable = true;
+
+  services.printing = {
+    enable = true;
+    drivers = [ pkgs.brlaser ];
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ 22 ]; # SSH port
