@@ -59,7 +59,7 @@
     #   '';
     # })
     python313
-    #wl-screenrec
+    wf-recorder
     thunderbird
     vlc
     ffmpeg
@@ -72,6 +72,9 @@
     jetbrains.idea
     nautilus
     parted
+    slurp
+    showtime
+    cups
   ];
 
   home.file.".config/JetBrains/IdeaIC2025.2/idea64.vmoptions".text = ''
@@ -79,6 +82,13 @@
     -Xms128m
     -Xmx2000m
   '';
+
+  home.file = {
+    "Pictures/profiles" = {
+      source = assets/profiles;
+      recursive = true;
+    };
+  };
 
   programs.direnv = {
     enable = true;
@@ -107,6 +117,7 @@
     enableZshIntegration = true;
   };
   programs.lazygit.enable = true;
+  programs.ghostty.enable = true;
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
