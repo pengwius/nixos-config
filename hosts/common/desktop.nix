@@ -78,7 +78,7 @@
       };
     };
     profileIcons = {
-      pengwius = ../../home-manager/assets/wallpapers/1.png;
+      pengwius = ../../home-manager/assets/profiles/avatar.jpg;
     };
   };
 
