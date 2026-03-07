@@ -4,8 +4,8 @@
   zramSwap = {
     enable = true;
     algorithm = "zstd";
-    memoryPercent = 70;
-    priority = 100;
+    memoryPercent = 60;
+    priority = 200;
   };
 
   boot.kernelParams = [
@@ -13,14 +13,31 @@
   ];
 
   boot.kernel.sysctl = {
-    "vm.swappiness" = 140;
+    "vm.swappiness" = 100;
+    "vm.overcommit_memory" = 1;
+    "vm.overcommit_ratio" = 50;
     "vm.page-cluster" = 0;
+    "vm.vfs_cache_pressure" = 200;
 
-    "vm.dirty_background_bytes" = 134217728; # 128 MB
-    "vm.dirty_bytes" = 268435456;             # 256 MB
+    "vm.dirty_ratio" = 10;
+    "vm.dirty_background_ratio" = 5;
 
     "vm.watermark_boost_factor" = 0;
     "vm.watermark_scale_factor" = 125;
+  };
+
+  systemd.settings.Manager = {
+    DefaultMemoryAccounting = "yes";
+    DefaultMemoryLow = "10%";
+    DefaultMemoryHigh = "50%";
+    DefaultCPUAccounting = "yes";
+  };
+
+  systemd.oomd = {
+    enable = true;
+    extraConfig = {
+      DefaultMemoryPressureDurationSec = "20s";
+    };
   };
 
   systemd.services.mglru = {
