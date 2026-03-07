@@ -24,8 +24,6 @@
   textfox = {
     enable = true;
     profile = "pengwius";
-    # https://github.com/adriankarlen/textfox/pull/131
-    useLegacyExtensions = false;
     config = {
       border = {
         color = "#393552";
