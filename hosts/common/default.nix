@@ -7,6 +7,8 @@
     ./zfs.nix
   ];
 
+  nix.package = pkgs.lixPackageSets.stable.lix;
+
   nix = {
     # Automate garbage collection
     gc = {
