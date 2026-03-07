@@ -4,13 +4,12 @@
   inputs = {
     # Nixpkgs
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
 
     # Home manager
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
-    # Apple Silicon
-    apple-silicon-support.url = "path:./apple-silicon-support";
+    home-manager.inputs.nixpkgs-stable.follows = "nixpkgs-stable";
 
     # WSL
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
@@ -45,6 +44,7 @@
     {
       self,
       nixpkgs,
+      nixpkgs-stable,
       home-manager,
       nixos-wsl,
       stylix,
@@ -82,7 +82,13 @@
       nixosConfigurations = {
         # Asahi Linux
         asahi = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs; };
+          specialArgs = {
+            inherit inputs outputs;
+            pkgs-stable = import nixpkgs-stable {
+              system = "aarch64-linux";
+              config.allowUnfree = true;
+            };
+          };
           modules = [
             ./hosts/asahi/configuration.nix
             stylix.nixosModules.stylix
@@ -94,6 +100,11 @@
                   inherit inputs outputs;
                   # Desktop computer, so we need GUI stuff.
                   enableGui = true;
+
+                  pkgs-stable = import nixpkgs-stable {
+                    system = "aarch64-linux";
+                    config.allowUnfree = true;
+                  };
                 };
                 backupFileExtension = "backup";
               };
