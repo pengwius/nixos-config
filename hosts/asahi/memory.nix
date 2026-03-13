@@ -1,43 +1,46 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
+  services.earlyoom = {
+    enable = true;
+    enableNotifications = false;
+    freeMemThreshold = 5;
+    freeSwapThreshold = 5;
+    extraArgs = [
+      "--prefer" "(^|/)(rust-analyzer|cargo|rustc|firefox|zed|niri|electron)$"
+      "--avoid" "(^|/)(systemd|Xwayland|pipewire|dbus-daemon|NetworkManager)$"
+    ];
+  };
+
+  systemd.oomd.enable = false;
+
   zramSwap = {
     enable = true;
     algorithm = "zstd";
-    memoryPercent = 60;
-    priority = 200;
+    memoryPercent = 100;
+    priority = 180;
   };
 
   boot.kernelParams = [
-    "zfs.zfs_arc_max=2147483648" # 2 GB
+    "zfs.zfs_arc_max=2147483648" # 2GB
   ];
 
   boot.kernel.sysctl = {
     "vm.swappiness" = 100;
-    "vm.overcommit_memory" = 1;
-    "vm.overcommit_ratio" = 50;
     "vm.page-cluster" = 0;
-    "vm.vfs_cache_pressure" = 200;
 
     "vm.dirty_ratio" = 10;
     "vm.dirty_background_ratio" = 5;
 
     "vm.watermark_boost_factor" = 0;
     "vm.watermark_scale_factor" = 125;
+
+    "vm.vfs_cache_pressure" = 100;
+    "vm.overcommit_memory" = 0;
   };
 
   systemd.settings.Manager = {
     DefaultMemoryAccounting = "yes";
-    DefaultMemoryLow = "10%";
-    DefaultMemoryHigh = "50%";
-    DefaultCPUAccounting = "yes";
-  };
-
-  systemd.oomd = {
-    enable = true;
-    extraConfig = {
-      DefaultMemoryPressureDurationSec = "20s";
-    };
   };
 
   systemd.services.mglru = {

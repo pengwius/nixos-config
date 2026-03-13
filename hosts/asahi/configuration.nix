@@ -29,7 +29,7 @@
       "zswap.enabled=1"
       "zswap.compressor=zstd"
       "zswap.zpool=zsmalloc"
-      #"zswap.max_pool_percent=50"
+      "zswap.max_pool_percent=50"
       "apple_dcp.show_notch=1"
     ];
     loader.efi.canTouchEfiVariables = false;
@@ -94,6 +94,13 @@
       "input"
       "networkmanager"
     ];
+  };
+
+  environment.variables = {
+    "CARGO_BUILD_JOBS" = "2";
+    "RUSTFLAGS" = "-C codegen-units=1";
+    "NIX_BUILD_CORES" = "2";
+    "MALLOC_TRIM_THRESHOLD_" = "131072";
   };
 
   environment.systemPackages = with pkgs; [
