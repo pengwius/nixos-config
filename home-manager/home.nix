@@ -66,6 +66,7 @@
     slurp
     showtime
     cups
+    sparrow
   ];
 
   home.file.".config/JetBrains/IdeaIC2025.2/idea64.vmoptions".text = ''

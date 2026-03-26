@@ -16,6 +16,7 @@ environment {
     ELECTRON_OZONE_PLATFORM_HINT "auto"
     MOZ_ENABLE_WAYLAND "1"
     EDITOR "nvim"
+    _JAVA_AWT_WM_NONREPARENTING "1"
 }
 
 // Debug settings

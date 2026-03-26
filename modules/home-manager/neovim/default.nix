@@ -74,6 +74,7 @@
 
           lazydev-nvim
           render-markdown-nvim
+          avante-nvim
         ];
 
         dev.config = {
