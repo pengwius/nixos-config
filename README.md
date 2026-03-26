@@ -1,5 +1,7 @@
 # ❄️ NixOS config
 
+![Rice](screenshots/rice.png)
+
 This configuration is based on [@SailorSnow's](https://github.com/SailorSnoW) config. He did an amazing job with it - thank you!
 
 This repository contains my personal NixOS configuration, primarily targeting Apple Silicon via Asahi Linux. Home Manager is integrated directly into the NixOS builds.

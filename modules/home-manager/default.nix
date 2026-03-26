@@ -11,4 +11,5 @@
 
   # Related Desktop apps requiring DestopManager and session
   gui = import ./gui;
+  noctalia = import ./gui/noctalia.nix;
 }

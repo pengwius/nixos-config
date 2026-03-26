@@ -1,11 +1,18 @@
 { pkgs, ... }:
 {
-
   programs.firefox = {
     enable = true;
 
     profiles = {
       pengwius = {
+        settings = {
+          "browser.tabs.unloadOnLowMemory" = true;
+          "gfx.webrender.all" = true;
+          "layers.acceleration.force-enabled" = true;
+          "browser.sessionstore.interval" = 6000;
+          "browser.cache.memory.enable" = true;
+          "browser.cache.memory.capacity" = 524288;
+        };
         extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
           vimium
@@ -42,5 +49,9 @@
       };
     };
 
+  };
+
+  home.sessionVariables = {
+    MOZ_ENABLE_WAYLAND = "1";
   };
 }

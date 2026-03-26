@@ -28,16 +28,7 @@
     cava
     cowsay
     cargo
-    talosctl
-    talhelper
-    kubectl
-    kubernetes-helm
-    hcloud
-    k9s
-    kind
     ncdu
-    sops
-    age
     devenv
     lazydocker
     telegram-desktop
@@ -88,6 +79,11 @@
       source = assets/profiles;
       recursive = true;
     };
+    "Pictures/wallpapers" = {
+      source = assets/wallpapers;
+      recursive = true;
+      force = true;
+    };
   };
 
   programs.direnv = {
@@ -118,6 +114,7 @@
   };
   programs.lazygit.enable = true;
   programs.ghostty.enable = true;
+  programs.zed-editor.enable = true;
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";

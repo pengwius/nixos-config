@@ -11,12 +11,6 @@
     ./niri
   ];
 
-  home.file = {
-    "Pictures/wallpapers" = {
-      source = ../../../home-manager/assets/wallpapers;
-    };
-  };
-
   home.packages = with pkgs; [
     signal-desktop
     (symlinkJoin {

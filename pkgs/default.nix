@@ -6,5 +6,4 @@ let
 in
 {
   # example = pkgs.callPackage ./example { };
-  tentrackule = pkgs.callPackage ./tentrackule { };
 }

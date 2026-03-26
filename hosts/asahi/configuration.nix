@@ -26,10 +26,7 @@
   # Use the systemd-boot EFI boot loader.
   boot = {
     kernelParams = [
-      "zswap.enabled=1"
-      "zswap.compressor=zstd"
-      "zswap.zpool=zsmalloc"
-      "zswap.max_pool_percent=50"
+      "zswap.enabled=0" # Conflict with zramSwap
       "apple_dcp.show_notch=1"
     ];
     loader.efi.canTouchEfiVariables = false;
@@ -41,7 +38,7 @@
 
   nixpkgs.config.allowUnsupportedSystem = true;
 
-  hardware = {
+   hardware = {
     asahi = {
       peripheralFirmwareDirectory = ./firmware;
       setupAsahiSound = true;
@@ -59,9 +56,7 @@
     };
   };
 
-  hardware.graphics.package =
-    assert pkgs.mesa.version == "26.0.0";
-    pkgs.mesa;
+  hardware.graphics.package = pkgs.mesa;
 
   powerManagement = {
     enable = true;
@@ -108,9 +103,6 @@
     cmatrix
     cbonsai
     niri
-    podman-tui
-    podman-compose
-    light
     iw
     libva-utils
     vulkan-tools
@@ -126,20 +118,6 @@
     upower.enable = true;
     fstrim.enable = true;
     udisks2.enable = true;
-  };
-
-  # Enable common container config files in /etc/containers
-  virtualisation.containers.enable = true;
-  virtualisation = {
-    podman = {
-      enable = true;
-
-      # Create a `docker` alias for podman, to use it as a drop-in replacement
-      dockerCompat = true;
-
-      # Required for containers under podman-compose to be able to talk to each other.
-      defaultNetwork.settings.dns_enabled = true;
-    };
   };
 
   # Some programs need SUID wrappers, can be configured further or are

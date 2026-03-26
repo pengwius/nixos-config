@@ -12,68 +12,104 @@
       enable = true;
 
       initLua = ''
-        require('config')
-        require('lz.n').load('plugins')
+        vim.opt.rtp:prepend(vim.fn.stdpath("config"))
+        require("config.lazy")
       '';
 
       plugins = {
-        start = with pkgs.vimPlugins; [
-          lz-n
-          nvim-lspconfig
-          blink-cmp
-          mini-icons
-          todo-comments-nvim
+        start = [
+          pkgs.vimPlugins.lazy-nvim
+          pkgs.vimPlugins.LazyVim
+          pkgs.vimPlugins.catppuccin-nvim
         ];
 
-        # Anything that you're lazy loading should be put here
         opt = with pkgs.vimPlugins; [
-          snacks-nvim
-          nvim-lint
+          bufferline-nvim
+          cmp-buffer
+          cmp-nvim-lsp
+          cmp-path
+          cmp_luasnip
           conform-nvim
-          which-key-nvim
+          dashboard-nvim
+          dressing-nvim
+          flash-nvim
+          friendly-snippets
           gitsigns-nvim
-          trouble-nvim
-          roslyn-nvim
-          lazydev-nvim
-          grug-far-nvim
-          mini-pairs
-          # lualine-nvim
-          mini-statusline
-          nvim-treesitter.withAllGrammars
-          render-markdown-nvim
-          (rustaceanvim.overrideAttrs { doCheck = false; })
-          rose-pine
+          indent-blankline-nvim
+          lualine-nvim
+          neo-tree-nvim
           noice-nvim
+          nui-nvim
+          nvim-cmp
+          nvim-lint
+          nvim-lspconfig
+          nvim-notify
+          nvim-spectre
+          nvim-treesitter.withAllGrammars
+          nvim-treesitter-context
+          nvim-treesitter-textobjects
+          nvim-ts-autotag
+          nvim-ts-context-commentstring
+          nvim-web-devicons
+          persistence-nvim
+          plenary-nvim
+          telescope-fzf-native-nvim
+          telescope-nvim
+          todo-comments-nvim
+          tokyonight-nvim
+          trouble-nvim
+          vim-illuminate
+          vim-startuptime
+          which-key-nvim
+
+          luasnip
+          catppuccin-nvim
+          mini-nvim
+
+          vim-wakatime
+          copilot-lua
+          copilot-cmp
+          CopilotChat-nvim
+          snacks-nvim
+
+          lazydev-nvim
+          render-markdown-nvim
         ];
 
         dev.config = {
-          # you can use lib.fileset to reduce rebuilds here
-          # https://noogle.dev/f/lib/fileset/toSource
           pure = ./.;
           impure =
-            # This is a hack it should be a absolute path
-            # here it'll only work from this directory
             "/' .. vim.uv.cwd()";
         };
       };
 
       extraBinPath = with pkgs; [
-        universal-ctags
+        git
         curl
         ripgrep
         fd
-        tectonic
-        imagemagick
-        mermaid-cli
-        prettierd
-        shfmt
-        stdenv.cc.cc
+        fzf
+
+        gnumake
+        gcc
+        unzip
 
         lua-language-server
         stylua
 
         nixd
         nixfmt-rfc-style
+
+        cargo
+        rustc
+        rustfmt
+        clippy
+
+        wakatime-cli
+
+        shfmt
+        prettierd
+        jq
       ];
 
       aliases = [ "vim" ];

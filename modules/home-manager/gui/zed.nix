@@ -12,10 +12,10 @@ let
       arch = if system == "aarch64-linux" then "aarch64" else "x86_64";
       sha256 =
         if system == "aarch64-linux" then
-          "1gldmfmp3nnwj9wzzax70wbbyhc90whvcsygwk1972by6xas0rnb"
+          "040di1dk2p9842m97ycwamp73fzn54pibfdh6wyyj5gyk6r0w3k0"
         else
-          "0g72mmrd4z0va50s0winji2172gr8glvvm1knj4qx75a0z9bkff3";
-      version = "0.226.4";
+          "1jq8m5qi0f3h3rzqa7jlck6gy2r7mp53x3k40qzklldayzm4s3qq";
+      version = "0.229.0";
     in
     pkgs.stdenv.mkDerivation rec {
       pname = "zed-editor";
@@ -124,6 +124,19 @@ in
       git = {
         inline_blame = {
           enabled = true;
+        };
+      };
+      lsp = {
+        rust-analyzer = {
+          binary = {
+            path = "/run/current-system/sw/bin/false";
+            arguments = [ ];
+          };
+        };
+      };
+      languages = {
+        Rust = {
+          language_servers = [ ];
         };
       };
     };

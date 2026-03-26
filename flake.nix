@@ -1,5 +1,5 @@
 {
-  description = "Pengwius (SnoW) NixOS configs";
+  description = "Pengwius NixOS configs";
 
   inputs = {
     # Nixpkgs

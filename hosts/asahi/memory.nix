@@ -4,15 +4,31 @@
   services.earlyoom = {
     enable = true;
     enableNotifications = false;
-    freeMemThreshold = 5;
-    freeSwapThreshold = 5;
+    freeMemThreshold = 15;
+    freeSwapThreshold = 15;
     extraArgs = [
-      "--prefer" "(^|/)(rust-analyzer|cargo|rustc|firefox|zed|niri|electron)$"
-      "--avoid" "(^|/)(systemd|Xwayland|pipewire|dbus-daemon|NetworkManager)$"
+      "--prefer" "(^|/)(rust-analyzer|cargo|rustc|firefox|electron)$"
+      "--avoid" "(^|/)(systemd|Xwayland|pipewire|dbus-daemon|NetworkManager|zed|MainThread|.zed-editor-wrapped|wakatime-ls|earlyoom|slice|session.slice|niri|niri-session)$"
     ];
   };
 
   systemd.oomd.enable = false;
+
+  systemd.services.niri = {
+    serviceConfig.OOMScoreAdjust = -1000;
+  };
+
+  systemd.services.MainThread = {
+    serviceConfig.OOMScoreAdjust = -1000;
+  };
+
+  systemd.services.zed = {
+    serviceConfig.OOMScoreAdjust = -1000;
+  };
+
+  systemd.services.niri-session = {
+    serviceConfig.OOMScoreAdjust = -1000;
+  };
 
   zramSwap = {
     enable = true;
@@ -26,14 +42,14 @@
   ];
 
   boot.kernel.sysctl = {
-    "vm.swappiness" = 100;
+    "vm.swappiness" = 10;
     "vm.page-cluster" = 0;
 
     "vm.dirty_ratio" = 10;
     "vm.dirty_background_ratio" = 5;
 
     "vm.watermark_boost_factor" = 0;
-    "vm.watermark_scale_factor" = 125;
+    "vm.watermark_scale_factor" = 100;
 
     "vm.vfs_cache_pressure" = 100;
     "vm.overcommit_memory" = 0;

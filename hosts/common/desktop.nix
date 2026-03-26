@@ -67,14 +67,14 @@
     enable = true;
     theme = "default";
     backgrounds = {
-      lockscreen = ../../home-manager/assets/wallpapers/lockscreen.png;
+      lockscreen = ../../home-manager/assets/wallpapers/purple2.jpg;
     };
     settings = {
       LoginScreen = {
-        background = "lockscreen.png";
+        background = "purple2.jpg";
       };
       LockScreen = {
-        background = "lockscreen.png";
+        background = "purple2.jpg";
       };
     };
     profileIcons = {
