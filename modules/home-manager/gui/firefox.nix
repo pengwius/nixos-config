@@ -11,7 +11,12 @@
           "layers.acceleration.force-enabled" = true;
           "browser.sessionstore.interval" = 6000;
           "browser.cache.memory.enable" = true;
-          "browser.cache.memory.capacity" = 524288;
+          "browser.cache.memory.capacity" = 262144;
+
+          "dom.ipc.processCount" = 2;
+          "dom.ipc.processCount.webIsolated" = 2;
+          "browser.sessionhistory.max_entries" = 10;
+          "browser.sessionhistory.max_total_viewers" = 1;
         };
         extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
