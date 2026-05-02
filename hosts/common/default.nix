@@ -21,6 +21,7 @@
       warn-dirty = false;
       # Enable flakes and new 'nix' command
       experimental-features = "nix-command flakes";
+      trusted-users = [ "root" "pengwius" ];
       # Automate `nix store --optimise`
       auto-optimise-store = true;
     };
