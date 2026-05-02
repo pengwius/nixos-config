@@ -1,95 +1,12 @@
 {
   pkgs,
-  pkgs-stable,
   lib,
   ...
 }:
 
-let
-  zed-custom =
-    let
-      system = pkgs.stdenv.hostPlatform.system;
-      arch = if system == "aarch64-linux" then "aarch64" else "x86_64";
-      sha256 =
-        if system == "aarch64-linux" then
-          "040di1dk2p9842m97ycwamp73fzn54pibfdh6wyyj5gyk6r0w3k0"
-        else
-          "1jq8m5qi0f3h3rzqa7jlck6gy2r7mp53x3k40qzklldayzm4s3qq";
-      version = "0.229.0";
-    in
-    pkgs.stdenv.mkDerivation rec {
-      pname = "zed-editor";
-      inherit version;
-
-      src = pkgs.fetchurl {
-        url = "https://github.com/zed-industries/zed/releases/download/v${version}/zed-linux-${arch}.tar.gz";
-        inherit sha256;
-      };
-
-      nativeBuildInputs = [
-        pkgs.autoPatchelfHook
-        pkgs.makeWrapper
-      ];
-
-      buildInputs = with pkgs; [
-        curl
-        fontconfig
-        freetype
-        libGL
-        libxkbcommon
-        openssl
-        stdenv.cc.cc
-        wayland
-        xorg.libxcb
-        zlib
-        alsa-lib
-        vulkan-loader
-        libz
-      ];
-
-      installPhase = ''
-        runHook preInstall
-
-        mkdir -p $out/bin $out/libexec
-
-        cp -r ./* $out/libexec/
-
-        if [ -f "$out/libexec/bin/zed" ]; then
-          ln -s $out/libexec/bin/zed $out/bin/zed
-          ln -s $out/libexec/bin/zed $out/bin/zeditor
-        elif [ -f "$out/libexec/zed" ]; then
-          ln -s $out/libexec/zed $out/bin/zed
-          ln -s $out/libexec/zed $out/bin/zeditor
-        fi
-
-        if [ -d "share" ]; then
-          mkdir -p $out/share
-          cp -r share/* $out/share/
-        fi
-
-        if [ -f "$out/share/applications/zed.desktop" ]; then
-          substituteInPlace $out/share/applications/zed.desktop \
-            --replace "Exec=zed" "Exec=$out/bin/zeditor"
-        fi
-
-        runHook postInstall
-      '';
-
-      postFixup = ''
-        wrapProgram $out/bin/zeditor \
-          --prefix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath buildInputs}
-
-        wrapProgram $out/bin/zed \
-          --prefix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath buildInputs}
-      '';
-    };
-in
 {
-  home.packages = [ zed-custom ];
-
   programs.zed-editor = {
     enable = true;
-    package = zed-custom;
     extensions = [
       "nix"
       "toml"
@@ -133,9 +50,60 @@ in
             arguments = [ ];
           };
         };
+        vtsls = {
+          binary = {
+            path = "/run/current-system/sw/bin/false";
+            arguments = [ ];
+          };
+        };
+        tailwindcss-language-server = {
+          binary = {
+            path = "/run/current-system/sw/bin/false";
+            arguments = [ ];
+          };
+        };
+        package-version-server = {
+          binary = {
+            path = "/run/current-system/sw/bin/false";
+            arguments = [ ];
+          };
+        };
+        eslint = {
+          binary = {
+            path = "/run/current-system/sw/bin/false";
+            arguments = [ ];
+          };
+        };
+        json-language-server = {
+          binary = {
+            path = "/run/current-system/sw/bin/false";
+            arguments = [ ];
+          };
+        };
+        vscode-css-language-server = {
+          binary = {
+            path = "/run/current-system/sw/bin/false";
+            arguments = [ ];
+          };
+        };
       };
       languages = {
         Rust = {
+          language_servers = [ ];
+        };
+        TypeScript = {
+          language_servers = [ ];
+        };
+        JavaScript = {
+          language_servers = [ ];
+        };
+        Vite = {
+          language_servers = [ ];
+        };
+        React = {
+          language_servers = [ ];
+        };
+        Tauri = {
           language_servers = [ ];
         };
       };
