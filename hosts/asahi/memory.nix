@@ -4,31 +4,22 @@
   services.earlyoom = {
     enable = true;
     enableNotifications = false;
-    freeMemThreshold = 15;
-    freeSwapThreshold = 15;
+    freeMemThreshold = 10;
+    freeSwapThreshold = 10;
     extraArgs = [
-      "--prefer" "(^|/)(rust-analyzer|cargo|rustc|firefox|electron)$"
-      "--avoid" "(^|/)(systemd|Xwayland|pipewire|dbus-daemon|NetworkManager|zed|MainThread|.zed-editor-wrapped|wakatime-ls|earlyoom|slice|session.slice|niri|niri-session)$"
+      "--prefer" "(^|/)(rust-analyzer|cargo|rustc|firefox|electron|WebKitWebProcess|WebKitNetworkProcess|node|npm|vite|tauri|esbuild|zed|MainThread|\\.zed-editor-wrapped)$"
+      "--avoid" "(^|/)(systemd|Xwayland|pipewire|dbus-daemon|NetworkManager|wakatime-ls|earlyoom|slice|session.slice|niri|niri-session)$"
     ];
+  };
+
+  services.ananicy = {
+    enable = true;
+    package = pkgs.ananicy-cpp;
   };
 
   systemd.oomd.enable = false;
 
-  systemd.services.niri = {
-    serviceConfig.OOMScoreAdjust = -1000;
-  };
 
-  systemd.services.MainThread = {
-    serviceConfig.OOMScoreAdjust = -1000;
-  };
-
-  systemd.services.zed = {
-    serviceConfig.OOMScoreAdjust = -1000;
-  };
-
-  systemd.services.niri-session = {
-    serviceConfig.OOMScoreAdjust = -1000;
-  };
 
   zramSwap = {
     enable = true;
@@ -42,17 +33,16 @@
   ];
 
   boot.kernel.sysctl = {
-    "vm.swappiness" = 10;
+    "vm.swappiness" = 100;
     "vm.page-cluster" = 0;
+
+    "vm.watermark_scale_factor" = 500;
+    "vm.min_free_kbytes" = 409600;
 
     "vm.dirty_ratio" = 10;
     "vm.dirty_background_ratio" = 5;
 
-    "vm.watermark_boost_factor" = 0;
-    "vm.watermark_scale_factor" = 100;
-
-    "vm.vfs_cache_pressure" = 100;
-    "vm.overcommit_memory" = 0;
+    "vm.vfs_cache_pressure" = 150;
   };
 
   systemd.settings.Manager = {
