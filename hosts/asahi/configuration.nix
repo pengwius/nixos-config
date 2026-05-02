@@ -99,6 +99,7 @@
   };
 
   environment.systemPackages = with pkgs; [
+    cpulimit
     pipes-rs
     cmatrix
     cbonsai
@@ -118,6 +119,9 @@
     upower.enable = true;
     fstrim.enable = true;
     udisks2.enable = true;
+
+    system76-scheduler.enable = true;
+    system76-scheduler.settings.cfsProfiles.enable = true;
   };
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -136,6 +140,7 @@
   services.openssh.enable = true;
 
   programs.xwayland.enable = true;
+  programs.appimage.enable = true;
   services.xserver.enable = true;
 
   services.printing = {
