@@ -23,15 +23,15 @@ let
       pname = "linux-asahi";
 
       # External displays through USB-C DP ALT MODE works on this branch
-      version = "6.18.5-fairydust";
-      modDirVersion = "6.18.5";
-      extraMeta.branch = "6.18";
+      version = "6.19.11-fairydust";
+      modDirVersion = "6.19.11";
+      extraMeta.branch = "6.19.11";
 
       src = fetchFromGitHub {
         owner = "AsahiLinux";
         repo = "linux";
-        rev = "fada65930a9b429d646eb2f384deb61896233284";
-        hash = "sha256-Fs20sODkF4bsChqn0nHisei1ddXH99DgdHqogZSPvsI=";
+        rev = "4e84610e5722c34e48fef3f33f7bd8faedb13348";
+        hash = "sha256-G32SzJW1paAUaBCnw5cou20WwpuVR8OZSDRpV58IUJU=";
       };
 
       ignoreConfigErrors = true;
