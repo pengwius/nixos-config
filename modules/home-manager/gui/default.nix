@@ -5,8 +5,10 @@
     ./rofi.nix
     ./spotify-player.nix
     ./ghostty.nix
-    # ./vscode.nix
+    ./vscode.nix
     ./zed.nix
+    #./gram.nix
+    # ./sparrow.nix
 
     ./niri
   ];
@@ -44,6 +46,7 @@
   home.sessionVariables = {
     QS_ICON_THEME = "Papirus-Dark";
     QT_QPA_PLATFORMTHEME = lib.mkForce "gtk3";
+    #QT_QPA_PLATFORMTHEME = "kde";
   };
 
   xdg.configFile."gtk-3.0/gtk.css".force = true;

@@ -1,11 +1,10 @@
 {
 
   time = {
-    timeZone = "Europe/Paris";
+    timeZone = "Europe/Warsaw";
     hardwareClockInLocalTime = true;
   };
 
-  # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
   i18n.extraLocaleSettings = {
@@ -24,11 +23,10 @@
     useXkbConfig = true; # use xkb.options in tty.
   };
 
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
-
-  # Configure keymap in X11
-  # services.xserver.xkb.layout = "fr";
-  # services.xserver.xkb.variant = "mac";
-  # services.xserver.xkb.options = "eurosign:e,caps:escape";
+  # Configure keymap in X11/Wayland
+  services.xserver.xkb = {
+    layout = "pl";
+    variant = "";
+    options = "lv3:lalt_switch";
+  };
 }

@@ -21,9 +21,20 @@
       warn-dirty = false;
       # Enable flakes and new 'nix' command
       experimental-features = "nix-command flakes";
-      trusted-users = [ "root" "pengwius" ];
+      trusted-users = [
+        "root"
+        "pengwius"
+      ];
       # Automate `nix store --optimise`
       auto-optimise-store = true;
+      extra-substituters = [ 
+        "https://cache.jel.gay?priority=2"
+        "https://noctalia.cachix.org?priority=1"
+      ];
+      extra-trusted-public-keys = [ 
+        "cache.jel.gay:B8uhW2bYk/NlZRVagGpPiYO5HzSAe7GoXJVEESf+9cU="
+        "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+      ];
     };
   };
 
@@ -59,11 +70,18 @@
     direnv
     btop
     home-manager
+    lucida-downloader
+    podman-compose
     # openjdk17
     # gradle
     # android-tools
     # android-studio-tools
   ];
+
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = true;
+  };
 
   environment.variables = {
     JAVA_HOME = "${pkgs.openjdk17}/lib/openjdk";
@@ -77,6 +95,17 @@
 
   programs.zsh.enable = true;
   programs.nix-ld.enable = true;
+
+  networking.hosts = {
+    "127.0.0.1" = [
+      "x.com"
+      "www.x.com"
+    ];
+    "::1" = [
+      "x.com"
+      "www.x.com"
+    ];
+  };
 
   services.logind.settings.Login.HandlePowerKey = "suspend";
 

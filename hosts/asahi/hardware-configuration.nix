@@ -45,12 +45,12 @@
     ];
   };
 
-  swapDevices = [
+/*  swapDevices = [
     {
       device = "/dev/zvol/zroot/swap";
       priority = 100;
     }
-  ];
+  ]; */
 
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
 }

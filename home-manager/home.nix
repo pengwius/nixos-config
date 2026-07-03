@@ -2,8 +2,8 @@
   inputs,
   outputs,
   pkgs,
+  pkgs-unstable,
   lib,
-  config,
   enableGui,
   ...
 }:
@@ -15,10 +15,12 @@
 
     outputs.homeManagerModules.zsh
     outputs.homeManagerModules.neovim
+    outputs.homeManagerModules.helix
     outputs.homeManagerModules.fastfetch
     outputs.homeManagerModules.yazi
     outputs.homeManagerModules.btop
     outputs.homeManagerModules.android-sdk
+    outputs.homeManagerModules.noctalia
   ]
   ++ lib.optionals enableGui [
     outputs.homeManagerModules.gui
@@ -33,7 +35,7 @@
     lazydocker
     telegram-desktop
     obs-studio
-    bitwarden-desktop
+    # bitwarden-desktop
     file
     wlr-randr
     unzip
@@ -66,7 +68,23 @@
     slurp
     showtime
     cups
-    sparrow
+    libreoffice-qt-fresh
+    opencode
+    pkgs-unstable.antigravity-cli
+    (symlinkJoin {
+      name = "sparrow-desktop-wrapped";
+      paths = [ sparrow ];
+      buildInputs = [ makeWrapper ];
+      postBuild = ''
+        rm $out/bin/sparrow-desktop
+        makeWrapper ${sparrow}/bin/sparrow-desktop $out/bin/sparrow-desktop \
+          --prefix PATH : ${lib.makeBinPath [ pkgs.xorg.xrandr ]} \
+          --set _JAVA_AWT_WM_NONREPARENTING 1 \
+          --add-flags "-Djdk.gtk.version=3"
+
+        ln -s $out/bin/sparrow-desktop $out/bin/sparrow
+      '';
+    })
   ];
 
   home.file.".config/JetBrains/IdeaIC2025.2/idea64.vmoptions".text = ''

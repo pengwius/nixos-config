@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 {
   xdg = {
     enable = true;
@@ -14,11 +14,192 @@
     };
   };
 
-  # home.packages = with pkgs; [
-  #   swww
-  #   wev
-  # ];
+  xdg.configFile."niri/config.kdl".text = ''
+    screenshot-path null
 
-  # Use native Niri config file instead of NixOS settings
-  home.file.".config/niri/config.kdl".source = ../../../../dotfiles/niri/config.kdl;
+    workspace "chat"
+    workspace "browser"
+
+    environment {
+        NIXOS_OZONE_WL "1"
+        ELECTRON_OZONE_PLATFORM_HINT "auto"
+        MOZ_ENABLE_WAYLAND "1"
+        EDITOR "nvim"
+        _JAVA_AWT_WM_NONREPARENTING "1"
+    }
+
+    debug {
+        honor-xdg-activation-with-invalid-serial
+    }
+
+    input {
+        keyboard {
+            xkb {
+                layout "pl"
+                options "lv3:lalt_switch"
+            }
+        }
+
+        touchpad {
+            dwt
+            scroll-factor 0.3
+        }
+
+        focus-follows-mouse
+    }
+
+    cursor {
+        hide-when-typing
+        xcursor-size 18
+    }
+
+    hotkey-overlay {
+        skip-at-startup
+    }
+
+    layout {
+        gaps 15
+
+        struts {
+            left -4
+            right -4
+            top -4
+            bottom -4
+        }
+
+        always-center-single-column
+
+        tab-indicator {
+            hide-when-single-tab
+        }
+
+        preset-column-widths {
+            proportion 0.33333333
+            proportion 0.5
+            proportion 0.66666666
+        }
+
+        border {
+            width 2
+            active-color "#c4a7e7"
+            inactive-color "#393552"
+        }
+
+        focus-ring {
+            off
+        }
+
+        shadow {
+            on
+            draw-behind-window false
+            softness 15
+            spread 6
+        }
+    }
+
+    binds {
+        // Fn keys
+        XF86MonBrightnessDown { spawn "brightnessctl" "set" "10%-"; }
+        XF86MonBrightnessUp { spawn "brightnessctl" "set" "10%+"; }
+        XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_SINK@" "5%-"; }
+        XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_SINK@" "5%+"; }
+        XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_SINK@" "toggle"; }
+        XF86AudioPlay { spawn "playerctl" "play-pause"; }
+        XF86AudioPrev { spawn "playerctl" "previous"; }
+        XF86AudioNext { spawn "playerctl" "next"; }
+
+        // General actions
+        Mod+Q { close-window; }
+        Mod+L { focus-column-right; }
+        Mod+H { focus-column-left; }
+        Mod+Shift+H { move-column-left; }
+        Mod+Shift+L { move-column-right; }
+        Mod+Shift+F { toggle-window-floating; }
+        Mod+Shift+P { switch-preset-column-width; }
+        Mod+Shift+M { maximize-column; }
+        Mod+Shift+apostrophe { screenshot; }
+
+        // Workspaces
+        Mod+J { focus-workspace-down; }
+        Mod+K { focus-workspace-up; }
+        Mod+Shift+J { move-window-to-workspace-down; }
+        Mod+Shift+K { move-window-to-workspace-up; }
+        Mod+ampersand { focus-workspace 1; }
+        Mod+eacute { focus-workspace 2; }
+        Mod+quotedbl { focus-workspace 3; }
+        Mod+apostrophe { focus-workspace 4; }
+        Mod+parenleft { focus-workspace 5; }
+        Mod+section { focus-workspace 6; }
+
+        // Sizing
+        Mod+Shift+Equal { set-column-width "+10%"; }
+        Mod+Minus { set-column-width "-10%"; }
+
+        // Mouse wheel workspace switching
+        Mod+WheelScrollDown      { focus-workspace-down; }
+        Mod+WheelScrollUp        { focus-workspace-up; }
+
+        // Shortcuts
+        Mod+T { spawn "ghostty"; }
+        Mod+B { spawn "ghostty" "-e" "btop"; }
+        Mod+F { spawn "ghostty" "-e" "yazi"; }
+        Mod+space { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+    }
+
+    layer-rule {
+        match namespace="^quickshell-wallpaper$"
+    }
+
+    layer-rule {
+        match namespace="^noctalia-overview$"
+        place-within-backdrop true
+    }
+
+    window-rule {
+        geometry-corner-radius 20
+        clip-to-geometry true
+        draw-border-with-background false
+        opacity 1.0
+    }
+
+    window-rule {
+        match app-id="^org.wezfurlong.wezterm$"
+        open-floating true
+    }
+
+    window-rule {
+        match app-id="^com.mitchellh.ghostty$"
+        open-floating true
+        opacity 1.0
+    }
+
+    window-rule {
+        match app-id="^(vesktop)$"
+        open-on-workspace "chat"
+        open-maximized true
+    }
+
+    window-rule {
+        match app-id="^(signal)$"
+        open-on-workspace "chat"
+    }
+
+    window-rule {
+        match app-id="^org.pulseaudio.pavucontrol$"
+        default-column-width { proportion 0.50; }
+        min-height 500
+        open-floating true
+    }
+
+    output "eDP-1" {
+        scale 1.75
+        position x=0 y=0
+    }
+
+    output "DP-1" {
+        mode "3440x1440@144.000"
+        position x=1463 y=0
+        scale 1.0
+    }
+  '';
 }

@@ -1,7 +1,7 @@
 // Niri config converted from NixOS format
 
 // Spawn at startup
-spawn-at-startup "noctalia-shell"
+spawn-at-startup "noctalia"
 
 // Screenshot
 screenshot-path null
@@ -138,7 +138,7 @@ binds {
     Mod+T { spawn "ghostty"; }
     Mod+B { spawn "ghostty" "-e" "btop"; }
     Mod+F { spawn "ghostty" "-e" "yazi"; }
-    Mod+space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
+    Mod+space { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
 }
 
 
@@ -167,7 +167,7 @@ window-rule {
 window-rule {
     match app-id="^com.mitchellh.ghostty$"
     open-floating true
-    opacity 0.96
+    opacity 1.0
 }
 
 window-rule {

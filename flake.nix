@@ -3,13 +3,13 @@
 
   inputs = {
     # Nixpkgs
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     # Home manager
-    home-manager.url = "github:nix-community/home-manager";
+    home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    home-manager.inputs.nixpkgs-stable.follows = "nixpkgs-stable";
 
     # WSL
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
@@ -18,7 +18,10 @@
     mnw.url = "github:Gerg-L/mnw";
 
     # Stylix
-    stylix.url = "github:danth/stylix";
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # NUR
     nur = {
@@ -27,10 +30,13 @@
     };
 
     # Textfox
-    textfox.url = "github:adriankarlen/textfox";
+    textfox = {
+      url = "github:adriankarlen/textfox";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
+      url = "github:noctalia-dev/noctalia";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -45,6 +51,7 @@
       self,
       nixpkgs,
       nixpkgs-stable,
+      nixpkgs-unstable,
       home-manager,
       nixos-wsl,
       stylix,
@@ -88,6 +95,10 @@
               system = "aarch64-linux";
               config.allowUnfree = true;
             };
+            pkgs-unstable = import nixpkgs-unstable {
+              system = "aarch64-linux";
+              config.allowUnfree = true;
+            };
           };
           modules = [
             ./hosts/asahi/configuration.nix
@@ -105,6 +116,10 @@
                     system = "aarch64-linux";
                     config.allowUnfree = true;
                   };
+                  pkgs-unstable = import nixpkgs-unstable {
+                    system = "aarch64-linux";
+                    config.allowUnfree = true;
+                  };
                 };
                 backupFileExtension = "backup";
               };
@@ -118,7 +133,13 @@
 
         # WSL
         wsl = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs; };
+          specialArgs = {
+            inherit inputs outputs;
+            pkgs-unstable = import nixpkgs-unstable {
+              system = "x86_64-linux";
+              config.allowUnfree = true;
+            };
+          };
           modules = [
             ./hosts/wsl/configuration.nix
             home-manager.nixosModules.home-manager
@@ -128,6 +149,10 @@
                 extraSpecialArgs = {
                   inherit inputs outputs;
                   enableGui = false;
+                  pkgs-unstable = import nixpkgs-unstable {
+                    system = "x86_64-linux";
+                    config.allowUnfree = true;
+                  };
                 };
                 backupFileExtension = ".backn";
               };

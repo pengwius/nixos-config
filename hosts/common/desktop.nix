@@ -30,12 +30,13 @@
 
   stylix = {
     enable = true;
+    targets.kmscon.enable = false;
     polarity = "dark";
     base16Scheme = "${pkgs.base16-schemes}/share/themes/rose-pine-moon.yaml";
     cursor = {
       package = pkgs.bibata-cursors;
       name = "Bibata-Modern-Ice";
-      size = 48;
+      size = 24;
     };
     opacity = {
       popups = 0.98;
@@ -85,6 +86,7 @@
   services = {
     upower.enable = true;
     trezord.enable = true;
+    desktopManager.plasma6.enable = true;
     displayManager.sddm = {
       enableHidpi = true;
       extraPackages = [ pkgs.bibata-cursors ];

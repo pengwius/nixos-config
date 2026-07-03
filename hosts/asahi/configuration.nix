@@ -5,6 +5,7 @@
 {
   inputs,
   pkgs,
+  lib,
   ...
 }:
 
@@ -18,164 +19,183 @@
 
     ./memory.nix
   ];
-  # FIXME: Added for stremio installation, should care about it !!!!
-  nixpkgs.config.permittedInsecurePackages = [
-    "qtwebengine-5.15.19"
-  ];
 
-  # Use the systemd-boot EFI boot loader.
-  boot = {
-    kernelParams = [
-      "zswap.enabled=0" # Conflict with zramSwap
-      "apple_dcp.show_notch=1"
-    ];
-    loader.efi.canTouchEfiVariables = false;
+  options.services.kmscon.config = lib.mkOption {
+    type = lib.types.anything;
+    default = { };
+    description = "Dummy option to fix Stylix compatibility with NixOS 26.05";
   };
 
-  boot.binfmt.emulatedSystems = [
-    "x86_64-linux"
-  ];
+  config = {
+    # FIXME: Added for stremio installation, should care about it !!!!
+    nixpkgs.config.permittedInsecurePackages = [
+      "qtwebengine-5.15.19"
+      "electron-39.8.10"
+    ];
 
-  nixpkgs.config.allowUnsupportedSystem = true;
-
-   hardware = {
-    asahi = {
-      peripheralFirmwareDirectory = ./firmware;
-      setupAsahiSound = true;
+    # Use the systemd-boot EFI boot loader.
+    boot = {
+      kernelParams = [
+        "zswap.enabled=0" # Conflict with zramSwap
+        "apple_dcp.show_notch=1"
+      ];
+      loader.efi.canTouchEfiVariables = false;
     };
 
-    graphics.enable = true;
+    boot.binfmt.emulatedSystems = [
+      "x86_64-linux"
+    ];
 
-    bluetooth.enable = true;
-    bluetooth.powerOnBoot = true;
-    bluetooth.settings = {
-      General = {
-        Enable = "Source,Sink,Media,Socket";
-        Experimental = true;
+    nixpkgs.config.allowUnsupportedSystem = true;
+
+    hardware = {
+      asahi = {
+        peripheralFirmwareDirectory = ./firmware;
+        setupAsahiSound = true;
+      };
+
+      graphics.enable = true;
+
+      bluetooth.enable = true;
+      bluetooth.powerOnBoot = true;
+      bluetooth.settings = {
+        General = {
+          Enable = "Source,Sink,Media,Socket";
+          Experimental = true;
+        };
       };
     };
-  };
 
-  hardware.graphics.package = pkgs.mesa;
+    hardware.graphics.package = pkgs.mesa;
 
-  powerManagement = {
-    enable = true;
-  };
-
-  services.logind.settings.Login = {
-    HandleLidSwitch = "suspend";
-    HandleLidSwitchExternalPower = "suspend";
-    HandlePowerKey = "suspend";
-  };
-
-  networking.hostName = "rysiek";
-
-  networking = {
-    networkmanager = {
+    powerManagement = {
       enable = true;
-      wifi.powersave = false;
     };
-  };
 
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
+    services.logind.settings.Login = {
+      HandleLidSwitch = "suspend";
+      HandleLidSwitchExternalPower = "suspend";
+      HandlePowerKey = "suspend";
+    };
 
-  users.users.pengwius = {
-    extraGroups = [
-      "wheel"
-      "audio"
-      "video"
-      "render"
-      "input"
-      "networkmanager"
+    networking.hostName = "rysiek";
+
+    networking = {
+      networkmanager = {
+        enable = true;
+        wifi.powersave = false;
+      };
+    };
+
+    # Enable CUPS to print documents.
+    # services.printing.enable = true;
+
+    users.users.pengwius = {
+      extraGroups = [
+        "wheel"
+        "audio"
+        "video"
+        "render"
+        "input"
+        "networkmanager"
+      ];
+    };
+
+    environment.variables = {
+      "CARGO_BUILD_JOBS" = "2";
+      "RUSTFLAGS" = "-C codegen-units=1";
+      "NIX_BUILD_CORES" = "2";
+      "MALLOC_TRIM_THRESHOLD_" = "131072";
+      "QML2_IMPORT_PATH" = "/run/current-system/sw/lib/qt-6/qml";
+    };
+
+    nix.settings = {
+      max-jobs = 4;
+      cores = 2;
+    };
+
+    environment.systemPackages = with pkgs; [
+      cpulimit
+      pipes-rs
+      cmatrix
+      cbonsai
+      niri
+      iw
+      libva-utils
+      vulkan-tools
+      mesa-demos
+      kdePackages.kirigami
+      kdePackages.kirigami-addons
+      kdePackages.qqc2-desktop-style
+      libqalculate
     ];
+
+    services = {
+      # Bluetooth pairing
+      blueman.enable = true;
+
+      upower.enable = true;
+      power-profiles-daemon.enable = true;
+      fstrim.enable = true;
+      udisks2.enable = true;
+
+      system76-scheduler.enable = true;
+      system76-scheduler.settings.cfsProfiles.enable = true;
+    };
+
+    # Some programs need SUID wrappers, can be configured further or are
+    # started in user sessions.
+    # programs.mtr.enable = true;
+    # programs.gnupg.agent = {
+    #   enable = true;
+    #   enableSSHSupport = true;
+    # };
+
+    programs.niri.enable = true;
+
+    # List services that you want to enable:
+
+    # Enable the OpenSSH daemon.
+    services.openssh.enable = true;
+
+    programs.xwayland.enable = true;
+    programs.appimage.enable = true;
+    services.xserver.enable = true;
+
+    services.printing = {
+      enable = true;
+      drivers = [ pkgs.brlaser ];
+    };
+
+    # Open ports in the firewall.
+    # networking.firewall.allowedTCPPorts = [ 22 ]; # SSH port
+    # networking.firewall.allowedUDPPorts = [ ... ];
+    # Or disable the firewall altogether.
+    # networking.firewall.enable = false;
+
+    # Copy the NixOS configuration file and link it from the resulting system
+    # (/run/current-system/configuration.nix). This is useful in case you
+    # accidentally delete configuration.nix.
+    # system.copySystemConfiguration = true;
+
+    # This option defines the first version of NixOS you have installed on this particular machine,
+    # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
+    #
+    # Most users should NEVER change this value after the initial install, for any reason,
+    # even if you've upgraded your system to a new NixOS release.
+    #
+    # This value does NOT affect the Nixpkgs version your packages and OS are pulled from,
+    # so changing it will NOT upgrade your system - see https://nixos.org/manual/nixos/stable/#sec-upgrading for how
+    # to actually do that.
+    #
+    # This value being lower than the current NixOS release does NOT mean your system is
+    # out of date, out of support, or vulnerable.
+    #
+    # Do NOT change this value unless you have manually inspected all the changes it would make to your configuration,
+    # and migrated your data accordingly.
+    #
+    # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
+    system.stateVersion = "25.05"; # Did you read the comment?
+
   };
-
-  environment.variables = {
-    "CARGO_BUILD_JOBS" = "2";
-    "RUSTFLAGS" = "-C codegen-units=1";
-    "NIX_BUILD_CORES" = "2";
-    "MALLOC_TRIM_THRESHOLD_" = "131072";
-  };
-
-  environment.systemPackages = with pkgs; [
-    cpulimit
-    pipes-rs
-    cmatrix
-    cbonsai
-    niri
-    iw
-    libva-utils
-    vulkan-tools
-    mesa-demos
-    inputs.noctalia.packages.${stdenv.hostPlatform.system}.default
-    libqalculate
-  ];
-
-  services = {
-    # Bluetooth pairing
-    blueman.enable = true;
-
-    upower.enable = true;
-    fstrim.enable = true;
-    udisks2.enable = true;
-
-    system76-scheduler.enable = true;
-    system76-scheduler.settings.cfsProfiles.enable = true;
-  };
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  programs.niri.enable = true;
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
-
-  programs.xwayland.enable = true;
-  programs.appimage.enable = true;
-  services.xserver.enable = true;
-
-  services.printing = {
-    enable = true;
-    drivers = [ pkgs.brlaser ];
-  };
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ 22 ]; # SSH port
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  # Copy the NixOS configuration file and link it from the resulting system
-  # (/run/current-system/configuration.nix). This is useful in case you
-  # accidentally delete configuration.nix.
-  # system.copySystemConfiguration = true;
-
-  # This option defines the first version of NixOS you have installed on this particular machine,
-  # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
-  #
-  # Most users should NEVER change this value after the initial install, for any reason,
-  # even if you've upgraded your system to a new NixOS release.
-  #
-  # This value does NOT affect the Nixpkgs version your packages and OS are pulled from,
-  # so changing it will NOT upgrade your system - see https://nixos.org/manual/nixos/stable/#sec-upgrading for how
-  # to actually do that.
-  #
-  # This value being lower than the current NixOS release does NOT mean your system is
-  # out of date, out of support, or vulnerable.
-  #
-  # Do NOT change this value unless you have manually inspected all the changes it would make to your configuration,
-  # and migrated your data accordingly.
-  #
-  # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-  system.stateVersion = "25.05"; # Did you read the comment?
-
 }

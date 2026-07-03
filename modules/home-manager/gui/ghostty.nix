@@ -4,14 +4,13 @@
     enableZshIntegration = true;
 
     settings = {
-      theme = "Rose Pine Moon";
-      font-size = 10;
-      font-family = "FiraCode Nerd Font Mono";
-      background-opacity = 1;
-      background-blur = true;
+      theme = "Catppuccin Macchiato";
+      font-size = 11;
+      font-family = "JetBrainsMono Nerd Font";
+      background-blur = false;
 
       cursor-style = "bar";
-      cursor-color = "#FFFFFF";
+      # cursor-color = "#FFFFFF";
       cursor-style-blink = true;
       cursor-opacity = 0.90;
       adjust-cursor-thickness = 1;

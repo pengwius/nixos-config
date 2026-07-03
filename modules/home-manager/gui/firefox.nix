@@ -17,6 +17,8 @@
           "dom.ipc.processCount.webIsolated" = 2;
           "browser.sessionhistory.max_entries" = 10;
           "browser.sessionhistory.max_total_viewers" = 1;
+
+          "intl.regional_prefs.use_os_locale" = true;
         };
         extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
