@@ -6,4 +6,5 @@ let
 in
 {
   # example = pkgs.callPackage ./example { };
+  nokia-fonts = pkgs.callPackage ./nokia-fonts { };
 }
