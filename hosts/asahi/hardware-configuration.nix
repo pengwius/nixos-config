@@ -45,12 +45,8 @@
     ];
   };
 
-/*  swapDevices = [
-    {
-      device = "/dev/zvol/zroot/swap";
-      priority = 100;
-    }
-  ]; */
+  # Swap wyłącznie na zramie (memory.nix). Zvol ZFS usunięty — swap na zvolu
+  # to udokumentowany wektor deadlocka w OpenZFS.
 
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
 }

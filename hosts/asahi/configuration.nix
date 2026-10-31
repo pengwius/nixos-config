@@ -14,19 +14,16 @@
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     ../common
-    ../common/desktop.nix
+    ../features/desktop.nix
+    ../features/zfs.nix
+    ../features/lowmem.nix
     ../../apple-silicon-support/modules
-
-    ./memory.nix
   ];
 
-  options.services.kmscon.config = lib.mkOption {
-    type = lib.types.anything;
-    default = { };
-    description = "Dummy option to fix Stylix compatibility with NixOS 26.05";
-  };
-
   config = {
+    # Główny user tego hosta — konsumuje hosts/common (users.nix, ścieżki).
+    _module.args.mainUser = "pengwius";
+
     # FIXME: Added for stremio installation, should care about it !!!!
     nixpkgs.config.permittedInsecurePackages = [
       "qtwebengine-5.15.19"
@@ -80,6 +77,9 @@
 
     networking.hostName = "rysiek";
 
+    # hostId musi być unikalny na host — wymagany przez ZFS.
+    networking.hostId = "abcdef12";
+
     networking = {
       networkmanager = {
         enable = true;
@@ -102,7 +102,7 @@
     };
 
     environment.variables = {
-      "CARGO_BUILD_JOBS" = "2";
+      "CARGO_BUILD_JOBS" = "1";
       "RUSTFLAGS" = "-C codegen-units=1";
       "NIX_BUILD_CORES" = "2";
       "MALLOC_TRIM_THRESHOLD_" = "131072";
@@ -110,9 +110,16 @@
     };
 
     nix.settings = {
-      max-jobs = 4;
-      cores = 2;
+      max-jobs = 1;
     };
+
+    # Buildy (dzieci nix-daemon) mają najwyższy priorytet zabicia przy braku
+    # RAM — desktop/firefox zostają, build leci na straty i wraca przy retry.
+    systemd.services.nix-daemon.serviceConfig.OOMScoreAdjust = 1000;
+
+    # max-jobs=1 — jeden build na raz, żeby nie zjeść RAMu na 8GB maszynie
+    # (earlyoom by zabił builda). Każde zadanie i tak buduje na wszystkich
+    # dostępnych rdzeniach.
 
     environment.systemPackages = with pkgs; [
       cpulimit
@@ -120,6 +127,7 @@
       cmatrix
       cbonsai
       niri
+      xwayland-satellite
       iw
       libva-utils
       vulkan-tools
