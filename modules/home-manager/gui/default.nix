@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, pkgs-unstable, lib, ... }:
 {
   imports = [
     ./firefox.nix
@@ -7,6 +7,7 @@
     ./ghostty.nix
     ./vscode.nix
     ./zed.nix
+    ./vesktop.nix
     #./gram.nix
     # ./sparrow.nix
 
@@ -15,17 +16,17 @@
 
   home.packages = with pkgs; [
     signal-desktop
-    (symlinkJoin {
-      name = "vesktop";
-      paths = [ vesktop ];
-      buildInputs = [ makeWrapper ];
-      postBuild = ''
-        wrapProgram $out/bin/vesktop \
-          --add-flags "--ozone-platform-hint=auto --enable-features=UseOzonePlatform --ozone-platform=wayland"
-      '';
-    })
+    # (symlinkJoin {
+    #   name = "vesktop";
+    #   paths = [ vesktop ];
+    #   buildInputs = [ makeWrapper ];
+    #   postBuild = ''
+    #     wrapProgram $out/bin/vesktop \
+    #       --add-flags "--ozone-platform-hint=auto --enable-features=UseOzonePlatform --ozone-platform=wayland"
+    #   '';
+    # })
     wl-clipboard
-    spotify-qt
+    pkgs-unstable.spotify-qt
     librespot
     easyeffects
   ];
