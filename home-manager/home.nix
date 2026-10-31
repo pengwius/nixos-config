@@ -11,8 +11,6 @@
 {
   # You can import other home-manager modules here
   imports = [
-    inputs.textfox.homeManagerModules.default
-
     outputs.homeManagerModules.zsh
     outputs.homeManagerModules.neovim
     outputs.homeManagerModules.helix
@@ -26,66 +24,82 @@
     outputs.homeManagerModules.gui
   ];
 
-  home.packages = with pkgs; [
-    cava
-    cowsay
-    cargo
-    ncdu
-    devenv
-    lazydocker
-    telegram-desktop
-    obs-studio
-    # bitwarden-desktop
-    file
-    wlr-randr
-    unzip
-    qbittorrent
-    gh
-    # (symlinkJoin {
-    #   name = "moonlight-qt";
-    #   paths = [ moonlight-qt ];
-    #   buildInputs = [ makeWrapper ];
-    #   postBuild = ''
-    #     wrapProgram $out/bin/moonlight \
-    #       --set QT_QPA_PLATFORM wayland \
-    #       --set SDL_VIDEODRIVER wayland
-    #   '';
-    # })
-    python313
-    wf-recorder
-    thunderbird
-    vlc
-    ffmpeg
-    audacity
-    android-studio-tools
-    kotlin
-    android-tools
-    xwayland
-    scrcpy
-    jetbrains.idea
-    nautilus
-    parted
-    slurp
-    showtime
-    cups
-    libreoffice-qt-fresh
-    opencode
-    pkgs-unstable.antigravity-cli
-    (symlinkJoin {
-      name = "sparrow-desktop-wrapped";
-      paths = [ sparrow ];
-      buildInputs = [ makeWrapper ];
-      postBuild = ''
-        rm $out/bin/sparrow-desktop
-        makeWrapper ${sparrow}/bin/sparrow-desktop $out/bin/sparrow-desktop \
-          --prefix PATH : ${lib.makeBinPath [ pkgs.xorg.xrandr ]} \
-          --set _JAVA_AWT_WM_NONREPARENTING 1 \
-          --add-flags "-Djdk.gtk.version=3"
+  home.packages =
+    with pkgs;
+    [
+      # CLI — zawsze, na każdym hoście.
+      cava
+      cowsay
+      cargo
+      ncdu
+      nix-output-monitor
+      devenv
+      lazydocker
+      # bitwarden-desktop
+      file
+      unzip
+      gh
+      # (symlinkJoin {
+      #   name = "moonlight-qt";
+      #   paths = [ moonlight-qt ];
+      #   buildInputs = [ makeWrapper ];
+      #   postBuild = ''
+      #     wrapProgram $out/bin/moonlight \
+      #       --set QT_QPA_PLATFORM wayland \
+      #       --set SDL_VIDEODRIVER wayland
+      #   '';
+      # })
+      python313
+      ffmpeg
+      android-studio-tools
+      kotlin
+      android-tools
+      pkgs-unstable.opencode
+      mold
+      go
+      gnupg
+      parted
+      cups
+      proton-vpn-cli
+    ]
+    ++ lib.optionals enableGui [
+      # GUI — tylko hosty z desktopem (enableGui).
+      pkgs-unstable.telegram-desktop
+      obs-studio
+      wlr-randr
+      qbittorrent
+      wf-recorder
+      thunderbird
+      vlc
+      audacity
+      xwayland
+      scrcpy
+      jetbrains.idea
+      nautilus
+      slurp
+      showtime
+      libreoffice-qt-fresh
+      pinentry-gnome3
+      (prismlauncher.override {
+        additionalPrograms = [ vlc ];
+        additionalLibs = [ vlc ];
+      })
+      # vesktop -> modules/home-manager/gui/vesktop.nix (programs.vesktop)
+      (symlinkJoin {
+        name = "sparrow-desktop-wrapped";
+        paths = [ sparrow ];
+        buildInputs = [ makeWrapper ];
+        postBuild = ''
+          rm $out/bin/sparrow-desktop
+          makeWrapper ${sparrow}/bin/sparrow-desktop $out/bin/sparrow-desktop \
+            --prefix PATH : ${lib.makeBinPath [ pkgs.xorg.xrandr ]} \
+            --set _JAVA_AWT_WM_NONREPARENTING 1 \
+            --add-flags "-Djdk.gtk.version=3"
 
-        ln -s $out/bin/sparrow-desktop $out/bin/sparrow
-      '';
-    })
-  ];
+          ln -s $out/bin/sparrow-desktop $out/bin/sparrow
+        '';
+      })
+    ];
 
   home.file.".config/JetBrains/IdeaIC2025.2/idea64.vmoptions".text = ''
     -Dawt.toolkit.name=WLToolkit
@@ -94,6 +108,23 @@
   '';
 
   home.file = {
+    ".cargo/config.toml".text = ''
+      [build]
+      jobs = 1
+
+      [profile.dev]
+      incremental = false
+      codegen-units = 1
+      [profile.dev.package."*"]
+      debug = 0
+
+      [profile.release]
+      codegen-units = 1
+
+      [target.aarch64-unknown-linux-gnu]
+      rustflags = ["-C", "link-arg=-fuse-ld=mold"]
+    '';
+
     "Pictures/profiles" = {
       source = assets/profiles;
       recursive = true;
@@ -112,6 +143,11 @@
   };
   programs.git = {
     enable = true;
+    signing = {
+      key = "EAECA739FFC3CD8B";
+      signByDefault = true;
+      format = "openpgp";
+    };
     settings.user = {
       name = "pengwius";
       email = "pengwius@protonmail.ch";

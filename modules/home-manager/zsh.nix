@@ -26,6 +26,7 @@
       open() {
         nautilus "$@" > /dev/null 2>&1 &!
       }
+      export GPG_TTY=$(tty)
     '';
     history = {
       expireDuplicatesFirst = true;
