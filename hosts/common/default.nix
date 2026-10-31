@@ -1,13 +1,14 @@
-{ outputs, pkgs, ... }:
+{ outputs, pkgs, mainUser, ... }:
 {
   imports = [
     ./boot.nix
     ./users.nix
     ./locale.nix
-    ./zfs.nix
+    ./kmscon-shim.nix
+    ./nixos-rebuild.nix
   ];
 
-  nix.package = pkgs.lixPackageSets.stable.lix;
+  nix.package = pkgs.lixPackageSets.latest.lix;
 
   nix = {
     # Automate garbage collection
@@ -23,17 +24,19 @@
       experimental-features = "nix-command flakes";
       trusted-users = [
         "root"
-        "pengwius"
+        mainUser
       ];
       # Automate `nix store --optimise`
       auto-optimise-store = true;
       extra-substituters = [ 
         "https://cache.jel.gay?priority=2"
         "https://noctalia.cachix.org?priority=1"
+        "https://zed.cachix.org"
       ];
       extra-trusted-public-keys = [ 
         "cache.jel.gay:B8uhW2bYk/NlZRVagGpPiYO5HzSAe7GoXJVEESf+9cU="
         "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+        "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
       ];
     };
   };
@@ -72,6 +75,14 @@
     home-manager
     lucida-downloader
     podman-compose
+    zerotierone
+    # Diagnostyka sieci (hotspot / ZeroTier / Minecraft / Discord):
+    mtr
+    nmap
+    tcpdump
+    traceroute
+    dnsutils
+    iperf3
     # openjdk17
     # gradle
     # android-tools
@@ -83,14 +94,18 @@
     dockerCompat = true;
   };
 
+  services.zerotierone = {
+    enable = true;
+  };
+
   environment.variables = {
     JAVA_HOME = "${pkgs.openjdk17}/lib/openjdk";
     JDK_HOME = "${pkgs.openjdk17}/lib/openjdk";
     GRADLE_HOME = "${pkgs.gradle}";
 
-    ANDROID_HOME = "/home/pengwius/Android/Sdk";
-    ANDROID_SDK_ROOT = "/home/pengwius/Android/Sdk";
-    ANDROID_NDK_ROOT = "/home/pengwius/Android/Sdk/ndk/29.0.14033849";
+    ANDROID_HOME = "/home/${mainUser}/Android/Sdk";
+    ANDROID_SDK_ROOT = "/home/${mainUser}/Android/Sdk";
+    ANDROID_NDK_ROOT = "/home/${mainUser}/Android/Sdk/ndk/29.0.14033849";
   };
 
   programs.zsh.enable = true;
@@ -106,6 +121,8 @@
       "www.x.com"
     ];
   };
+
+  networking.firewall.allowedUDPPorts = [ 9993 ];
 
   services.logind.settings.Login.HandlePowerKey = "suspend";
 

@@ -1,7 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, mainUser, ... }:
 {
   users.users = {
-    pengwius = {
+    ${mainUser} = {
       isNormalUser = true;
       shell = pkgs.zsh;
     };
