@@ -29,12 +29,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Textfox
-    textfox = {
-      url = "github:adriankarlen/textfox";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     noctalia = {
       url = "github:noctalia-dev/noctalia";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -69,6 +63,56 @@
       # This is a function that generates an attribute by calling a function you
       # pass to it, with each system as an argument
       forAllSystems = nixpkgs.lib.genAttrs systems;
+
+      # Helper na nowe hosty: podajesz katalog w ./hosts, architekturę,
+      # usera Home Managera i czy ma być GUI — reszta sama.
+      # Host #3 to potem trzy linijki w nixosConfigurations.
+      mkHost =
+        {
+          hostName,
+          system,
+          hmUser,
+          enableGui,
+        }:
+        nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            inherit inputs outputs;
+            pkgs-stable = import nixpkgs-stable {
+              inherit system;
+              config.allowUnfree = true;
+            };
+            pkgs-unstable = import nixpkgs-unstable {
+              inherit system;
+              config.allowUnfree = true;
+            };
+          };
+          modules = [
+            ./hosts/${hostName}/configuration.nix
+            stylix.nixosModules.stylix
+            nur.modules.nixos.default
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                extraSpecialArgs = {
+                  inherit inputs outputs enableGui;
+                  pkgs-stable = import nixpkgs-stable {
+                    inherit system;
+                    config.allowUnfree = true;
+                  };
+                  pkgs-unstable = import nixpkgs-unstable {
+                    inherit system;
+                    config.allowUnfree = true;
+                  };
+                };
+                backupFileExtension = "backup";
+              };
+
+              home-manager.useUserPackages = true;
+              home-manager.useGlobalPkgs = true;
+              home-manager.users.${hmUser} = import ./home-manager/home.nix;
+            }
+          ];
+        };
     in
     {
       # Your custom packages
@@ -87,81 +131,20 @@
       # NixOS configuration entrypoints
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
-        # Asahi Linux
-        asahi = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs outputs;
-            pkgs-stable = import nixpkgs-stable {
-              system = "aarch64-linux";
-              config.allowUnfree = true;
-            };
-            pkgs-unstable = import nixpkgs-unstable {
-              system = "aarch64-linux";
-              config.allowUnfree = true;
-            };
-          };
-          modules = [
-            ./hosts/asahi/configuration.nix
-            stylix.nixosModules.stylix
-            nur.modules.nixos.default
-            home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                extraSpecialArgs = {
-                  inherit inputs outputs;
-                  # Desktop computer, so we need GUI stuff.
-                  enableGui = true;
-
-                  pkgs-stable = import nixpkgs-stable {
-                    system = "aarch64-linux";
-                    config.allowUnfree = true;
-                  };
-                  pkgs-unstable = import nixpkgs-unstable {
-                    system = "aarch64-linux";
-                    config.allowUnfree = true;
-                  };
-                };
-                backupFileExtension = "backup";
-              };
-
-              home-manager.useUserPackages = true;
-              home-manager.useGlobalPkgs = true;
-              home-manager.users.pengwius = import ./home-manager/home.nix;
-            }
-          ];
+        # Asahi Linux (Apple Silicon, aarch64, ZFS)
+        asahi = mkHost {
+          hostName = "asahi";
+          system = "aarch64-linux";
+          hmUser = "pengwius";
+          enableGui = true;
         };
 
-        # WSL
-        wsl = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs outputs;
-            pkgs-unstable = import nixpkgs-unstable {
-              system = "x86_64-linux";
-              config.allowUnfree = true;
-            };
-          };
-          modules = [
-            ./hosts/wsl/configuration.nix
-            home-manager.nixosModules.home-manager
-            nixos-wsl.nixosModules.default
-            {
-              home-manager = {
-                extraSpecialArgs = {
-                  inherit inputs outputs;
-                  enableGui = false;
-                  pkgs-unstable = import nixpkgs-unstable {
-                    system = "x86_64-linux";
-                    config.allowUnfree = true;
-                  };
-                };
-                backupFileExtension = ".backn";
-              };
-
-              home-manager.useUserPackages = true;
-              home-manager.useGlobalPkgs = true;
-              home-manager.users.nixos = import ./home-manager/home.nix;
-            }
-          ];
+        # gruchot (stary MacBook Intel, x86_64, ext4)
+        gruchot = mkHost {
+          hostName = "gruchot";
+          system = "x86_64-linux";
+          hmUser = "pengwius";
+          enableGui = true;
         };
       };
     };
