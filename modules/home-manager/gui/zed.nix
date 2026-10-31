@@ -17,6 +17,8 @@
       "kdl"
       "xml"
       "kotlin"
+      "go"
+      "scss"
     ];
 
     userSettings = lib.mkForce {
