@@ -1,5 +1,14 @@
 { pkgs, ... }:
 {
+  imports = [ ./window-memory.nix ];
+
+  home.packages = with pkgs; [
+    # Required for automatic XWayland integration; do not add
+    # spawn-at-startup or DISPLAY manually, that breaks it.
+    xwayland-satellite
+    xwayland
+  ];
+
   xdg = {
     enable = true;
     mime.enable = true;
@@ -98,7 +107,6 @@
     }
 
     binds {
-        // Fn keys
         XF86MonBrightnessDown { spawn "brightnessctl" "set" "10%-"; }
         XF86MonBrightnessUp { spawn "brightnessctl" "set" "10%+"; }
         XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_SINK@" "5%-"; }
@@ -108,7 +116,6 @@
         XF86AudioPrev { spawn "playerctl" "previous"; }
         XF86AudioNext { spawn "playerctl" "next"; }
 
-        // General actions
         Mod+Q { close-window; }
         Mod+L { focus-column-right; }
         Mod+H { focus-column-left; }
@@ -119,7 +126,6 @@
         Mod+Shift+M { maximize-column; }
         Mod+Shift+apostrophe { screenshot; }
 
-        // Workspaces
         Mod+J { focus-workspace-down; }
         Mod+K { focus-workspace-up; }
         Mod+Shift+J { move-window-to-workspace-down; }
@@ -131,15 +137,12 @@
         Mod+parenleft { focus-workspace 5; }
         Mod+section { focus-workspace 6; }
 
-        // Sizing
         Mod+Shift+Equal { set-column-width "+10%"; }
         Mod+Minus { set-column-width "-10%"; }
 
-        // Mouse wheel workspace switching
         Mod+WheelScrollDown      { focus-workspace-down; }
         Mod+WheelScrollUp        { focus-workspace-up; }
 
-        // Shortcuts
         Mod+T { spawn "ghostty"; }
         Mod+B { spawn "ghostty" "-e" "btop"; }
         Mod+F { spawn "ghostty" "-e" "yazi"; }
@@ -201,5 +204,8 @@
         position x=1463 y=0
         scale 1.0
     }
+
+    // Must stay last: these rules override earlier window rules.
+    include optional=true "window-memory.kdl"
   '';
 }
