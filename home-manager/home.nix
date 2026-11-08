@@ -75,10 +75,8 @@
       xwayland
       scrcpy
       jetbrains.idea
-      nautilus
       slurp
-      showtime
-      libreoffice-qt-fresh
+      libreoffice-fresh
       pinentry-gnome3
       (prismlauncher.override {
         additionalPrograms = [ vlc ];

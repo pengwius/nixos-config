@@ -1,7 +1,13 @@
-{ pkgs, pkgs-unstable, lib, ... }:
+{
+  pkgs,
+  pkgs-unstable,
+  lib,
+  ...
+}:
 {
   imports = [
     ./firefox.nix
+    ./gnome.nix
     ./rofi.nix
     ./spotify-player.nix
     ./ghostty.nix
@@ -15,6 +21,8 @@
   ];
 
   home.packages = with pkgs; [
+    materialfy
+    pixelgram
     signal-desktop
     # (symlinkJoin {
     #   name = "vesktop";
@@ -36,19 +44,8 @@
     allowImages = true;
   };
 
-  gtk = {
-    enable = true;
-    iconTheme = {
-      package = pkgs.papirus-icon-theme;
-      name = "Papirus-Dark";
-    };
-  };
-
   home.sessionVariables = {
     QS_ICON_THEME = "Papirus-Dark";
     QT_QPA_PLATFORMTHEME = lib.mkForce "gtk3";
-    #QT_QPA_PLATFORMTHEME = "kde";
   };
-
-  xdg.configFile."gtk-3.0/gtk.css".force = true;
 }

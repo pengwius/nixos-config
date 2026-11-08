@@ -106,7 +106,6 @@
       "RUSTFLAGS" = "-C codegen-units=1";
       "NIX_BUILD_CORES" = "2";
       "MALLOC_TRIM_THRESHOLD_" = "131072";
-      "QML2_IMPORT_PATH" = "/run/current-system/sw/lib/qt-6/qml";
     };
 
     nix.settings = {
@@ -132,9 +131,6 @@
       libva-utils
       vulkan-tools
       mesa-demos
-      kdePackages.kirigami
-      kdePackages.kirigami-addons
-      kdePackages.qqc2-desktop-style
       libqalculate
     ];
 

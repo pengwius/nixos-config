@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   imports = [ ./window-memory.nix ];
 
@@ -25,6 +25,8 @@
 
   xdg.configFile."niri/config.kdl".text = ''
     screenshot-path null
+    prefer-no-csd
+    spawn-at-startup "${pkgs.xrdb}/bin/xrdb" "-merge" "${config.home.homeDirectory}/.Xresources"
 
     workspace "chat"
     workspace "browser"
@@ -59,7 +61,8 @@
 
     cursor {
         hide-when-typing
-        xcursor-size 18
+        xcursor-theme "${config.home.pointerCursor.name}"
+        xcursor-size ${toString config.home.pointerCursor.size}
     }
 
     hotkey-overlay {
@@ -144,7 +147,7 @@
         Mod+WheelScrollUp        { focus-workspace-up; }
 
         Mod+T { spawn "ghostty"; }
-        Mod+B { spawn "ghostty" "-e" "btop"; }
+        Mod+B { spawn "ghostty" "--window-height=30" "-e" "btop"; }
         Mod+F { spawn "ghostty" "-e" "yazi"; }
         Mod+space { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     }

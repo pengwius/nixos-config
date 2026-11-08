@@ -35,11 +35,7 @@
       project_panel = {
         dock = "left";
       };
-      assistant = {
-        dock = "left";
-        version = "2";
-        enabled = true;
-      };
+      disable_ai = true;
       git = {
         inline_blame = {
           enabled = true;

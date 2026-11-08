@@ -111,16 +111,16 @@
   programs.zsh.enable = true;
   programs.nix-ld.enable = true;
 
-  networking.hosts = {
-    "127.0.0.1" = [
-      "x.com"
-      "www.x.com"
-    ];
-    "::1" = [
-      "x.com"
-      "www.x.com"
-    ];
-  };
+  # networking.hosts = {
+  #   "127.0.0.1" = [
+  #     "x.com"
+  #     "www.x.com"
+  #   ];
+  #   "::1" = [
+  #     "x.com"
+  #     "www.x.com"
+  #   ];
+  # };
 
   networking.firewall.allowedUDPPorts = [ 9993 ];
 

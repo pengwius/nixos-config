@@ -13,6 +13,11 @@
     brightnessctl
     pavucontrol
     playerctl
+    gnome-sound-recorder
+    deja-dup
+    file-roller
+    glib
+    gsettings-desktop-schemas
     (symlinkJoin {
       name = "trezor-suite";
       paths = [ trezor-suite ];
@@ -36,7 +41,7 @@
     cursor = {
       package = pkgs.bibata-cursors;
       name = "Bibata-Modern-Ice";
-      size = 24;
+      size = 18;
     };
     opacity = {
       popups = 0.98;
@@ -86,13 +91,26 @@
   services = {
     upower.enable = true;
     trezord.enable = true;
-    desktopManager.plasma6.enable = true;
+    gvfs.enable = true;
+    flatpak.enable = true;
+    gnome = {
+      core-apps.enable = true;
+      core-developer-tools.enable = true;
+      evolution-data-server.enable = true;
+      gnome-online-accounts.enable = true;
+    };
+    displayManager.defaultSession = "niri";
     displayManager.sddm = {
+      enable = true;
       enableHidpi = true;
       extraPackages = [ pkgs.bibata-cursors ];
       settings.General.GreeterEnvironment = lib.mkForce "QT_SCALE_FACTOR=2,QML2_IMPORT_PATH=${config.programs.silentSDDM.package'}/share/sddm/themes/silent/components/,QT_IM_MODULE=qtvirtualkeyboard";
     };
   };
 
+  programs.dconf.enable = true;
+  programs.evolution.enable = true;
+
   security.pam.services.swaylock = { };
+  security.pam.services.sddm.enableGnomeKeyring = true;
 }

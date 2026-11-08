@@ -4,17 +4,36 @@
 
 This configuration is based on [@SailorSnow's](https://github.com/SailorSnoW) config. He did an amazing job with it - thank you!
 
-This repository contains my personal NixOS configuration, primarily targeting Apple Silicon via Asahi Linux. Home Manager is integrated directly into the NixOS builds.
+This repository contains my personal NixOS configuration for Apple Silicon (Asahi Linux) and an older Intel MacBook Air. Home Manager is integrated directly into the NixOS builds.
 
-I am using this configuration as my daily driver on a MacBook Air M1 (8GB RAM / 256GB Storage). It currently includes the experimental Asahi Linux branch with working external display support via USB-C.
+I am using this configuration as my daily driver on a MacBook Air M1. It currently includes the experimental Asahi Linux branch with working external display support via USB-C.
 
-This configuration uses ZFS as the root filesystem along with ZRAM. This setup is extremely helpful for devices with limited RAM and storage.
+The `asahi` host uses ZFS for `/` and `/home`; `gruchot` targets ext4. Both use ZRAM and shared low-memory tuning.
+
+## 🎨 Rice: Material Design 3 Expressive
+
+The rice is based on **Material Design 3 Expressive**: a dark lavender palette, rounded surfaces, capsule-shaped controls and expressive workspace indicators.
+
+- **Niri** is the Wayland compositor; **Noctalia** is the desktop shell.
+- Firefox has a custom M3 Expressive-inspired theme.
+- GNOME applications and developer tools provide the everyday toolset. GTK styling follows Noctalia's palette.
+- Roboto Flex, Papirus-Dark icons and the Bibata-Modern-Ice cursor complete the desktop styling. Stylix still themes other supported applications.
+
+## 🖥️ Hosts
+
+| Flake output | System hostname | Hardware | Platform | Storage / memory |
+| --- | --- | --- | --- | --- |
+| `asahi` | `rysiek` | MacBook Air M1 | `aarch64-linux`, asahi | ZFS + ZRAM |
+| `gruchot` | `gruchot` | MacBook Air 2014 Intel Core 2 Duo | `x86_64-linux` | ext4 + ZRAM |
+
 
 I will guide you through the entire installation process. Please note that these instructions **might not be complete**, as I wrote them from memory step-by-step and may have overlooked some details. If you encounter any issues, feel free to contact me on [Telegram](https://t.me/pengwius) or Matrix: `@pengwius:matrix.org`. I will be more than happy to help you and update the instructions.
 
 —
 
-# Installing
+# Installing on Apple Silicon (`asahi`)
+
+The following guide is for `asahi`.
 
 ## 0. Shrinking the macOS Partition
 
@@ -38,7 +57,8 @@ You could alternatively use the entire space and shrink the ext4 partition later
 Clone my configuration into your user home directory:
 
 ```bash
-git clone https://github.com/pengwius/nixos-config 
+git clone https://github.com/pengwius/nixos-config
+cd nixos-config
 ```
 
 Replace `pengwius` with your username in the following files:
@@ -57,7 +77,7 @@ fileSystems."/" = {
 };
 ```
 
-Change the disk UUID in `fileSystems."/boot"` to match yours, and comment out `swapDevices` and `fileSystems."/home"`.
+Change the disk UUID in `fileSystems."/boot"` to match yours, and comment out `fileSystems."/home"` during the initial ext4 installation. Leave disk-backed `swapDevices` unset; ZRAM is already configured.
 
 You can retrieve your UUID by running `lsblk -f` or `blkid`.
 
@@ -192,33 +212,9 @@ zpool list
 zfs list
 ```
 
-## 7. Adding Swap
+## 7. Swap / ZRAM
 
-To add swap, uncomment `swapDevices` in `/hosts/asahi/hardware-configuration.nix`, and create a ZFS Zvol for swap:
-
-```bash
-sudo zfs create -V 16G -b $(getconf PAGESIZE) -o compression=off -o logbias=throughput -o sync=always -o primarycache=metadata -o secondarycache=none zroot/swap
-```
-
-Format it as swap:
-
-```bash
-sudo mkswap /dev/zvol/zroot/swap
-```
-
-Enable it:
-
-```bash
-sudo swapon /dev/zvol/zroot/swap
-```
-
-Finally, rebuild the system:
-
-```bash
-sudo nixos-rebuild switch --flake .#asahi
-```
-
-Your NixOS Asahi setup on ZFS should now work perfectly!
+ZRAM swap is enabled declaratively by `hosts/features/lowmem.nix` on both hosts; no manual swap creation is needed. **Do not create swap on a ZFS zvol**: it can deadlock under memory pressure. The current configuration uses ZRAM only.
 
 —
 
@@ -228,9 +224,15 @@ Your NixOS Asahi setup on ZFS should now work perfectly!
   ```bash
   nix flake check
   ```
-- Build system closure (dry):
+- Build a system closure without activating it (replace `asahi` with `gruchot` for Intel):
   ```bash
-  nix build .#nixosConfigurations.asahi.config.system.build.toplevel
+  nix build --no-link .#nixosConfigurations.asahi.config.system.build.toplevel
+  ```
+- Activate on the matching machine, after adapting its hardware configuration:
+  ```bash
+  sudo nixos-rebuild switch --flake .#asahi
+  # On the Intel MacBook Air instead:
+  sudo nixos-rebuild switch --flake .#gruchot
   ```
 - Update inputs:
   ```bash
@@ -239,35 +241,44 @@ Your NixOS Asahi setup on ZFS should now work perfectly!
 
 —
 
-## 🖥️ Host
-
-- `asahi`: Asahi Linux on Apple Silicon (daily driver)
-
 ## 📦 Repository Structure
 
-- `flake.nix`/`flake.lock`: Flake entry and locked inputs
+- `flake.nix` / `flake.lock`: Inputs, locks, `mkHost` helper, host outputs and integrated Home Manager. Stable/unstable package sets are passed as module arguments here.
 - `hosts/`
-  - `asahi/`: Host configuration (imports Apple Silicon support)
-  - `common/`: Shared host glue (`boot.nix`, `locale.nix`, `desktop.nix`, `users.nix`)
-- `home-manager/`: User config and assets; applied via system rebuilds
+  - `asahi/`: Apple Silicon host settings and real hardware/filesystem configuration; imports the local Apple Silicon modules and ZFS feature.
+  - `gruchot/`: Intel host settings and hardware template; imports neither Asahi nor ZFS.
+  - `common/`: Shared system base: boot, users, locale, Nix/Lix settings, packages, containers, console shim and rebuild helper.
+  - `features/desktop.nix`: Shared GNOME applications/services, SDDM + SilentSDDM login screen, and base Stylix settings.
+  - `features/lowmem.nix`: ZRAM, OOM handling and memory/watchdog tuning for both hosts.
+  - `features/zfs.nix`: ZFS kernel integration, snapshots, scrubbing, TRIM and ARC limit; used by `asahi`.
+- `home-manager/home.nix`: User entrypoint: module imports, CLI/GUI packages, Git, direnv and managed files. GUI imports/packages are gated by `enableGui`.
+- `home-manager/assets/`: Wallpapers and profile pictures, also installed into `~/Pictures/`.
 - `modules/`
-  - `modules/nixos/`: Reusable NixOS modules (e.g., `netdata.nix`, `minecraft-server-*.nix`)
-  - `modules/home-manager/`: Reusable HM modules (e.g., `zsh.nix`, `neovim/`, `gui/`)
-- `overlays/`: Overlays including an `unstable` package set
-- `pkgs/`: Custom packages (e.g., `tentrackule`)
-- `dotfiles/`: Misc dotfiles not managed as HM modules
+  - `modules/nixos/default.nix`: NixOS module export set, currently empty; shared system configuration lives under `hosts/`.
+  - `modules/home-manager/default.nix`: Home Manager module exports.
+  - `modules/home-manager/noctalia/`: Authoritative shell settings, M3 Expressive palette, rail, widgets and lock screen.
+  - `modules/home-manager/gui/niri/`: Generated Niri configuration, bindings, window rules and window-memory helper.
+  - `modules/home-manager/gui/gnome.nix`: GTK 3/4 styling derived from Noctalia, fonts, icons, cursor, dconf and default file handlers.
+  - `modules/home-manager/gui/firefox.nix` + `modules/home-manager/gui/firefox/material-expressive.css`: Firefox profile, vertical tabs and custom browser styling.
+  - `modules/home-manager/gui/`: Other application settings, including Ghostty, Zed, VS Code and Vesktop.
+  - `modules/home-manager/neovim/`: Neovim plugins and Lua configuration through Home Manager's `programs.neovim`.
+  - `modules/home-manager/`: CLI/editor modules such as Zsh, Yazi, btop, Helix, fastfetch and Android SDK settings.
+- `overlays/default.nix`: Exposes local packages through the `additions` overlay; `modifications` is currently empty.
+- `pkgs/`: Custom `materialfy`, `pixelgram` and `nokia-fonts` packages, exported by `default.nix`. pixelGram's ARM64/Wayland patches and regression checks live alongside its package.
+- `apple-silicon-support/`: Local Apple Silicon NixOS modules and packages, including kernel/platform support.
+- `dotfiles/`: Standalone fastfetch and Niri files; the active Niri configuration is generated by Home Manager, not copied from here.
+- `screenshots/`: Rice and installation screenshots.
 
 —
 
 ## 🧩 Notable Choices
 
-- Wayland compositor: Niri (via `services.greetd` session)
-- Stylix: Used for theming and fonts
-- Podman: Enabled (Docker‑compat) with DNS for compose
-- Bluetooth: Via BlueZ + Blueman
-- Home Manager modules: Zsh, Neovim (nixCats), GUI apps (Firefox, Ghostty, etc.)
+- Desktop: Niri + Noctalia; SDDM with SilentSDDM as the login manager.
+- Applications: GNOME core apps and developer tools, plus Evolution, File Roller, backups and Software/Flatpak; Firefox, Ghostty, Zed, Vesktop, Materialfy and pixelGram.
+- Theming: M3 Expressive-inspired Noctalia, Firefox and GTK styling.
+- Podman: Enabled with Docker compatibility and `podman-compose`.
 
-—
+-
 
 ## ❄️ Notes
 

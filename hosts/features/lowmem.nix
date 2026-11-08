@@ -14,7 +14,7 @@
     freeSwapThreshold = 10;
     extraArgs = [
       "--prefer" "^(cargo|rustc|cc|gcc|clang|g++|ld|lld|ninja|make|meson|cmake|python|nix-build|nix-daemon)$"
-      "--avoid" "^(bash|zsh|fish|tmux|ssh|sudo|sudoedit|niri|noctalia|Xwayland|firefox|zed|ghostty|pipewire|WirePlumber|plasmashell)$"
+      "--avoid" "^(bash|zsh|fish|tmux|ssh|sudo|sudoedit|niri|noctalia|Xwayland|firefox|zed|ghostty|pipewire|WirePlumber)$"
     ];
   };
 

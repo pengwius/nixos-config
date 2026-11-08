@@ -1,0 +1,27 @@
+--- a/ComposeWindowPanel.desktop.kt
++++ b/ComposeWindowPanel.desktop.kt
+@@ -69,9 +69,8 @@
+             // opening separate windows from [ComposePanel] with such layer type.
+             if (it == LayerType.OnComponent) LayerType.OnSameCanvas else it
+         },
+-        // Swing graphics is not supposed to be used here.
+-        // TODO: Add isVsyncEnabled flag to ComposeWindowPanel constructor
+-        renderSettings = RenderSettings.SkiaSurface(),
++        // WLToolkit has no X11 DrawingSurface; draw through Swing instead.
++        renderSettings = RenderSettings.SwingGraphics(),
+         coroutineContext = coroutineContext
+     )
+     private val composeContainer
+@@ -108,6 +107,12 @@
+         }
+ 
+     init {
++        // WLToolkit needs an initial window repaint for the Swing surface to map.
++        window.addComponentListener(object : java.awt.event.ComponentAdapter() {
++            override fun componentShown(event: java.awt.event.ComponentEvent) {
++                window.repaint()
++            }
++        })
+         layout = null
+         focusTraversalPolicy = object : FocusTraversalPolicy() {
+             override fun getComponentAfter(aContainer: Container?, aComponent: Component?) = null

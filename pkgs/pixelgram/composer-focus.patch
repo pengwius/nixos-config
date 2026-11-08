@@ -1,0 +1,16 @@
+--- a/ChatView.kt
++++ b/ChatView.kt
+@@ -2569,7 +2569,12 @@
+     val forwarding = PendingForward.drafts[chatId] != null
+     LaunchedEffect(forwarding) { if (forwarding) runCatching { focus.requestFocus() } }
+     val pickScope = rememberCoroutineScope()
+-    LaunchedEffect(chatId) { runCatching { focus.requestFocus() } }
++    val windowFocused = androidx.compose.ui.platform.LocalWindowInfo.current.isWindowFocused
++    val shouldFocusComposer = windowFocused && !com.pixelgram.desktop.core.AppLock.locked &&
++        LocalModalHost.current?.editing == null
++    LaunchedEffect(chatId, shouldFocusComposer) {
++        if (shouldFocusComposer) runCatching { focus.requestFocus() }
++    }
+     var draftBeforeEdit by remember(chatId) { mutableStateOf<Pair<TextFieldValue, List<FormatSpan>>?>(null) }
+     LaunchedEffect(editing?.key) {
+         if (editing != null) {
