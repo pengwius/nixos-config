@@ -1,101 +1,126 @@
 /* Material 3 Expressive-inspired chrome, using the Noctalia palette. */
 :root {
-  color-scheme: dark !important;
-  font-family: "Roboto Flex", sans-serif !important;
-  --toolbar-bgcolor: #30283e !important;
-  --toolbar-color: #eee5f5 !important;
-  --lwt-accent-color: #30283e !important;
-  --lwt-text-color: #eee5f5 !important;
-  --lwt-sidebar-background-color: #30283e !important;
-  --lwt-sidebar-text-color: #eee5f5 !important;
-  --toolbar-field-background-color: #463b58 !important;
-  --toolbar-field-color: #eee5f5 !important;
-  --toolbar-field-focus-background-color: #463b58 !important;
-  --toolbar-field-focus-color: #eee5f5 !important;
-  --toolbar-field-focus-border-color: #ac8bf9 !important;
-  --toolbarbutton-icon-fill: #cec2da !important;
-  --toolbarbutton-icon-fill-attention: #ac8bf9 !important;
-  --toolbarbutton-hover-background: #5a4a70 !important;
-  --toolbarbutton-active-background: #5a4a70 !important;
-  --toolbarbutton-border-radius: 999px !important;
-  --arrowpanel-background: #463b58 !important;
-  --arrowpanel-color: #eee5f5 !important;
-  --arrowpanel-border-color: #b3a1c9 !important;
-  --arrowpanel-border-radius: 24px !important;
-  --panel-item-hover-bgcolor: #5a4a70 !important;
-  --panel-item-active-bgcolor: #5a4a70 !important;
-  --panel-item-border-radius: 16px !important;
-  --focus-outline-color: #ac8bf9 !important;
+    color-scheme: dark !important;
+    font-family: "DejaVu Sans", sans-serif !important;
+    --toolbar-bgcolor: #30283e !important;
+    --toolbar-color: #eee5f5 !important;
+    --lwt-accent-color: #30283e !important;
+    --lwt-text-color: #eee5f5 !important;
+    --lwt-sidebar-background-color: #30283e !important;
+    --lwt-sidebar-text-color: #eee5f5 !important;
+    --toolbar-field-background-color: #463b58 !important;
+    --toolbar-field-color: #eee5f5 !important;
+    --toolbar-field-focus-background-color: #463b58 !important;
+    --toolbar-field-focus-color: #eee5f5 !important;
+    --toolbar-field-focus-border-color: #ac8bf9 !important;
+    --toolbarbutton-icon-fill: #cec2da !important;
+    --toolbarbutton-icon-fill-attention: #ac8bf9 !important;
+    --toolbarbutton-hover-background: #5a4a70 !important;
+    --toolbarbutton-active-background: #5a4a70 !important;
+    --toolbarbutton-border-radius: 999px !important;
+    --arrowpanel-background: #463b58 !important;
+    --arrowpanel-color: #eee5f5 !important;
+    --arrowpanel-border-color: #b3a1c9 !important;
+    --arrowpanel-border-radius: 24px !important;
+    --panel-item-hover-bgcolor: #5a4a70 !important;
+    --panel-item-active-bgcolor: #5a4a70 !important;
+    --panel-item-border-radius: 16px !important;
+    --focus-outline-color: #ac8bf9 !important;
 }
 
-#TabsToolbar { display: none !important; }
-
-#sidebar-box, #sidebar-container, #navigator-toolbox, #tabbrowser-tabbox, #browser {
-  background-color: #30283e !important;
-  color: #eee5f5 !important;
+#TabsToolbar {
+    display: none !important;
 }
 
-#navigator-toolbox { border-bottom: none !important; }
+#sidebar-box,
+#sidebar-container,
+#navigator-toolbox,
+#tabbrowser-tabbox,
+#browser {
+    background-color: #30283e !important;
+    color: #eee5f5 !important;
+}
+
+#navigator-toolbox {
+    border-bottom: none !important;
+}
 :root:not([inFullscreen], [inDOMFullscreen]) #tabbrowser-tabpanels {
-  border-radius: 24px !important;
-  overflow: hidden !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
 }
 
 #nav-bar {
-  padding: 4px 6px !important;
-  background-color: #30283e !important;
+    padding: 4px 6px !important;
+    background-color: #30283e !important;
 }
-#urlbar-container { margin: 0 4px !important; }
-#urlbar, #urlbar-background { border-radius: 24px !important; }
-#urlbar-input, #urlbar-input::placeholder { text-align: center !important; }
-#urlbar-input::selection { background-color: #ac8bf9 !important; color: #1e1630 !important; }
+#urlbar-container {
+    margin: 0 4px !important;
+}
+#urlbar,
+#urlbar-background {
+    border-radius: 24px !important;
+}
+#urlbar-input,
+#urlbar-input::placeholder {
+    text-align: center !important;
+}
+#urlbar-input::selection {
+    background-color: #ac8bf9 !important;
+    color: #1e1630 !important;
+}
 
 #tabbrowser-tabs {
-  --tab-background-color-selected: #ac8bf9 !important;
-  --tab-selected-textcolor: #1e1630 !important;
-  --tab-selected-outline-color: transparent !important;
-  --tab-box-shadow-selected: none !important;
-  --tab-border-radius: 999px !important;
+    --tab-background-color-selected: #ac8bf9 !important;
+    --tab-selected-textcolor: #1e1630 !important;
+    --tab-selected-outline-color: transparent !important;
+    --tab-box-shadow-selected: none !important;
+    --tab-border-radius: 999px !important;
 }
 
 .tab-background {
-  border-radius: 999px !important;
-  box-shadow: none !important;
+    border-radius: 999px !important;
+    box-shadow: none !important;
 }
 .tabbrowser-tab:is([selected], [visuallyselected]) .tab-background {
-  background: #ac8bf9 !important;
-  outline: none !important;
+    background: #ac8bf9 !important;
+    outline: none !important;
 }
 .tabbrowser-tab:is([selected], [visuallyselected]) .tab-content {
-  color: #1e1630 !important;
+    color: #1e1630 !important;
 }
 .tabbrowser-tab:not([visuallyselected], [selected]):hover .tab-background {
-  background: #5a4a70 !important;
+    background: #5a4a70 !important;
 }
 .tabbrowser-tab:focus-visible .tab-background {
-  outline: 2px solid #cec2da !important;
-  outline-offset: 2px !important;
+    outline: 2px solid #cec2da !important;
+    outline-offset: 2px !important;
 }
 
 #sidebar-button:is([checked="true"], [open="true"]) > .toolbarbutton-icon {
-  background-color: #d8bdf5 !important;
-  fill: #322343 !important;
+    background-color: #d8bdf5 !important;
+    fill: #322343 !important;
 }
 
 #urlbar-view {
-  --urlbarview-background-color-selected: #5a4a70 !important;
-  --urlbarview-background-color-hover: #5a4a70 !important;
-  --urlbarview-text-color-selected: #f2e8ff !important;
+    --urlbarview-background-color-selected: #5a4a70 !important;
+    --urlbarview-background-color-hover: #5a4a70 !important;
+    --urlbarview-text-color-selected: #f2e8ff !important;
 }
-.urlbarView-row-inner { border-radius: 16px !important; }
+.urlbarView-row-inner {
+    border-radius: 16px !important;
+}
 .urlbarView-row:is([selected], :hover) .urlbarView-row-inner,
-menu[_moz-menuactive="true"], menuitem[_moz-menuactive="true"] {
-  background-color: #5a4a70 !important;
-  color: #f2e8ff !important;
+menu[_moz-menuactive="true"],
+menuitem[_moz-menuactive="true"] {
+    background-color: #5a4a70 !important;
+    color: #f2e8ff !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .tab-background, .toolbarbutton-icon {
-    transition: background-color 160ms ease-out, border-radius 160ms ease-out !important;
-  }
+    .tab-background,
+    .toolbarbutton-icon {
+        transition:
+            background-color 160ms ease-out,
+            border-radius 160ms ease-out !important;
+    }
 }

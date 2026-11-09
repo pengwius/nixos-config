@@ -50,8 +50,7 @@ in
       inherit (config.home.pointerCursor) package name size;
     };
     font = {
-      name = "Roboto Flex";
-      package = pkgs.roboto-flex;
+      inherit (config.stylix.fonts.sansSerif) name package;
       size = 11;
     };
     theme = {
@@ -106,9 +105,9 @@ in
     icon-theme = "Papirus-Dark";
     cursor-theme = config.home.pointerCursor.name;
     cursor-size = config.home.pointerCursor.size;
-    font-name = "Roboto Flex 11";
-    document-font-name = "Roboto Flex 11";
-    monospace-font-name = "FiraCode Nerd Font Mono 11";
+    font-name = "${config.gtk.font.name} 11";
+    document-font-name = "${config.stylix.fonts.serif.name} 11";
+    monospace-font-name = "${config.stylix.fonts.monospace.name} 11";
   };
 
   xdg.mimeApps.defaultApplications = {

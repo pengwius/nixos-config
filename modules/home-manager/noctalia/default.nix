@@ -9,7 +9,6 @@
   imports = [ inputs.noctalia.homeModules.default ];
 
   stylix.targets.noctalia.enable = false;
-  home.packages = [ pkgs.roboto-flex ];
   fonts.fontconfig.enable = true;
 
   home.file."${config.xdg.stateHome}/noctalia/settings.toml".text = "";
@@ -254,7 +253,7 @@
 
       shell = {
         app_icon_color = "primary";
-        font_family = "Roboto Flex";
+        font_family = config.stylix.fonts.sansSerif.name;
         corner_radius_scale = 2.0;
         button_borders = false;
         input_borders = false;

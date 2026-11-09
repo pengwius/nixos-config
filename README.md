@@ -17,7 +17,7 @@ The rice is based on **Material Design 3 Expressive**: a dark lavender palette, 
 - **Niri** is the Wayland compositor; **Noctalia** is the desktop shell.
 - Firefox has a custom M3 Expressive-inspired theme.
 - GNOME applications and developer tools provide the everyday toolset. GTK styling follows Noctalia's palette.
-- Roboto Flex, Papirus-Dark icons and the Bibata-Modern-Ice cursor complete the desktop styling. Stylix still themes other supported applications.
+- DejaVu Sans and FiraCode fonts, Papirus-Dark icons and the Bibata-Modern-Ice cursor complete the desktop styling. Stylix still themes other supported applications.
 
 ## 🖥️ Hosts
 
