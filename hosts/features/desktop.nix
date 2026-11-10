@@ -9,6 +9,11 @@
 {
   imports = [ inputs.silentSDDM.nixosModules.default ];
 
+  environment.gnome.excludePackages = with pkgs; [
+    gnome-maps
+    gnome-clocks
+  ];
+
   environment.systemPackages = with pkgs; [
     brightnessctl
     pavucontrol
