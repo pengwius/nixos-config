@@ -2,6 +2,7 @@
   pkgs,
   pkgs-unstable,
   lib,
+  osConfig,
   ...
 }:
 {
@@ -20,24 +21,36 @@
     ./niri
   ];
 
-  home.packages = with pkgs; [
-    materialfy
-    pixelgram
-    signal-desktop
-    # (symlinkJoin {
-    #   name = "vesktop";
-    #   paths = [ vesktop ];
-    #   buildInputs = [ makeWrapper ];
-    #   postBuild = ''
-    #     wrapProgram $out/bin/vesktop \
-    #       --add-flags "--ozone-platform-hint=auto --enable-features=UseOzonePlatform --ozone-platform=wayland"
-    #   '';
-    # })
-    wl-clipboard
-    pkgs-unstable.spotify-qt
-    librespot
-    easyeffects
-  ];
+  home.packages =
+    with pkgs;
+    [
+      signal-desktop
+      # (symlinkJoin {
+      #   name = "vesktop";
+      #   paths = [ vesktop ];
+      #   buildInputs = [ makeWrapper ];
+      #   postBuild = ''
+      #     wrapProgram $out/bin/vesktop \
+      #       --add-flags "--ozone-platform-hint=auto --enable-features=UseOzonePlatform --ozone-platform=wayland"
+      #   '';
+      # })
+      wl-clipboard
+      pkgs-unstable.spotify-qt
+      librespot
+      easyeffects
+    ]
+    ++
+      lib.optionals
+        (
+          !(builtins.elem osConfig.networking.hostName [
+            "y50-70"
+            "gruchot"
+          ])
+        )
+        [
+          materialfy
+          pixelgram
+        ];
 
   services.cliphist = {
     enable = true;
