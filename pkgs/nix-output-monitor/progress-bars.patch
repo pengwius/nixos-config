@@ -1,0 +1,177 @@
+--- a/lib/NOM/Print.hs
++++ b/lib/NOM/Print.hs
+@@ -14,7 +14,7 @@
+ import Data.Tree (Forest, Tree (Node))
+ import GHC.Records (HasField)
+ import NOM.Builds (Derivation (..), FailType (..), Host (..), StorePath (..))
+-import NOM.NixMessage.JSON (ActivityId (..))
++import NOM.NixMessage.JSON (Activity (CopyPath), ActivityId (..), ActivityProgress (..))
+ import NOM.Print.Table (Entry, blue, bold, cells, dummy, green, grey, header, label, magenta, markup, markups, prependLines, printAlignedSep, red, text, yellow)
+ import NOM.Print.Tree (showForest)
+ import NOM.State (
+@@ -101,6 +101,17 @@
+ showCond :: (Monoid m) => Bool -> m -> m
+ showCond = memptyIfFalse
+ 
++progressBar :: Int -> Int -> Text
++progressBar completed total
++  | total <= 0 = ""
++  | otherwise =
++      "[" <> Text.replicate filled "█" <> Text.replicate (12 - filled) "░" <> "] " <> show percent <> "%"
++ where
++  -- Use Integer so large byte counters cannot overflow when scaled.
++  amount = toInteger (max 0 (min completed total))
++  filled = fromInteger (amount * 12 `div` toInteger total)
++  percent = amount * 100 `div` toInteger total
++
+ targetRatio, defaultTreeMax :: Int
+ targetRatio = 3 -- We divide by this, don‘t set this to zero.
+ defaultTreeMax = 20
+@@ -174,6 +185,8 @@
+             (not (Seq.null nixErrors), const errorDisplay)
+           , (not (Seq.null nixTraces), const traceDisplay)
+           , (not (Seq.null forestRoots), buildsDisplay . snd)
++          , (downloadsRunning > 0, downloadsDisplay . snd)
++          , (totalTasks > 0, const tasksDisplay)
+           ]
+     maxHeight = case maybeWindow of
+       Just limit -> limit `div` targetRatio -- targetRatio is hardcoded to be bigger than zero.
+@@ -186,6 +199,21 @@
+         (printBuilds buildState hostNums maxHeight now)
+     errorDisplay = printErrors nixErrors maxHeight
+     traceDisplay = printTraces nixTraces maxHeight
++    tasksDisplay =
++      horizontal <> " Tasks " <> progressBar completedTasks totalTasks
++        <> " · " <> show completedTasks <> "/" <> show totalTasks <> " completed"
++        <> showCond (numFailedBuilds > 0) (markup red (" · " <> show numFailedBuilds <> " failed"))
++    downloadsDisplay now =
++      prependLines horizontal (vertical <> " ") (vertical <> " ")
++        (" Downloads (NAR bytes):" :| (take maxHeight (downloadLine now <$> CMap.toList runningDownloads)
++          <> showCond (downloadsRunning > maxHeight) ["… " <> show (downloadsRunning - maxHeight) <> " more downloads"]))
++    downloadLine now (pathId, transfer) =
++      let path = (evalState (getStorePathInfos pathId) buildState).name
++          progressText = case Map.lookup (path, transfer.host) downloadProgress >>= Strict.toLazy of
++            Just p | p.expected > 0 && p.done >= 0 ->
++              progressBar p.done p.expected <> " · " <> mib p.done <> "/" <> mib p.expected <> " MiB NAR · "
++            _ -> ""
++       in unwords $ [down, progressText <> path.name] <> ifTimeDiffRelevant now transfer.start id
+   -- evalMessage = case evaluationState.lastFileName of
+   --   Strict.Just file_name -> Just ("Evaluated " <> show (evaluationState.count) <> " files, last one was '" <> file_name <> "'")
+   --   Strict.Nothing -> Nothing
+@@ -198,6 +226,16 @@
+   completedBuilds' = (.host) <$> completedBuilds
+   failedBuilds' = (.host) <$> failedBuilds
+   numFailedBuilds = CMap.size failedBuilds
++  completedTasks = numCompletedBuilds + downloadsDone + uploadsDone
++  totalTasks = totalBuilds + numFailedBuilds + downloadsDone + downloadsRunning + numPlannedDownloads + uploadsDone + uploadsRunning
++  downloadProgress =
++    Map.fromList
++      [ ((path, host), status.progress)
++      | status <- IntMap.elems activities
++      , CopyPath path host Localhost <- [status.activity]
++      ]
++  mib :: Int -> Text
++  mib bytes = toText (printf "%.1f" (fromIntegral bytes / (1024 * 1024) :: Double) :: String)
+   table time' =
+     prependLines
+       (stimes (3 :: Int) horizontal <> " ")
+--- a/test/Property.hs
++++ b/test/Property.hs
+@@ -1,12 +1,22 @@
++import Control.Monad (foldM)
+ import Data.Set (singleton)
++import Data.Strict qualified as Strict
++import Data.Text qualified as Text
++import Data.Time (getZonedTime)
+ import NOM.Builds
++import NOM.NixMessage.JSON qualified as JSON
+ import NOM.NixMessage.OldStyle (NixOldStyleMessage (..))
+ import NOM.Parser
++import NOM.Print (Config (..), stateToText)
++import NOM.State qualified as State
++import NOM.State.CacheId.Map qualified as CMap
++import NOM.StreamParser (stripANSICodes)
++import NOM.Update (updateStateNixJSONMessage)
+ import NOM.Util (parseOne)
+ import Relude
+ import Relude.Unsafe qualified as Unsafe
+ import Test.HUnit
+ 
+ assertOldStyleParse :: ByteString -> IO (ByteString, NixOldStyleMessage)
+ assertOldStyleParse input = do
+   let res = parseOne parser input
+@@ -15,12 +25,73 @@
+   assertBool "parsing succeeds with an actual match" (isJust res')
+   pure (t, Unsafe.fromJust res')
+ 
++downloadPath :: StorePath
++downloadPath = StorePath "yk1164s4bkj6p3s4mzxm5fc4qn38cnmf" "ghc-8.8.2-doc"
++
++copyStart :: Int -> StorePath -> JSON.NixJSONMessage
++copyStart activityId path = JSON.Start (JSON.MkStartAction (JSON.MkId activityId) JSON.Info "" (JSON.CopyPath path (Host "https://cache.nixos.org") Localhost))
++
++copyProgress :: Int -> Int -> Int -> JSON.NixJSONMessage
++copyProgress activityId completed total = JSON.Result (JSON.MkResultAction (JSON.MkId activityId) (JSON.Progress (JSON.MkActivityProgress completed total 0 0)))
++
++renderState :: State.NOMV1State -> IO Text
++renderState nomState = do
++  now <- getZonedTime
++  pure $ stripANSICodes $ stateToText (MkConfig False False) nomState Nothing (now, nomState.startTime + 2)
++
++renderMessages :: [JSON.NixJSONMessage] -> IO Text
++renderMessages messages = do
++  initial <- State.initalStateFromBuildPlatform Nothing
++  nomState <- foldM (\old message -> do
++    ((errs, _), new) <- updateStateNixJSONMessage message old
++    assertEqual "no update errors" [] errs
++    pure (fromMaybe old new)) initial messages
++  renderState nomState
++
++downloadRow :: Text -> Text
++downloadRow = Text.unlines . filter (Text.isInfixOf downloadPath.name) . Text.lines
++
+ main :: IO ()
+ main = do
+   counts <-
+     runTestTT
+       $ test
+-        [ "Parse Plan" ~: do
++        [ "Download progress uses byte counts" ~: do
++            output <- renderMessages [copyStart 1 downloadPath, copyProgress 1 1048576 4194304]
++            assertBool "quarter bar and NAR size" ("[███░░░░░░░░░] 25% · 1.0/4.0 MiB NAR" `Text.isInfixOf` downloadRow output)
++            assertBool "running copy is not a completed task" ("0/1 completed" `Text.isInfixOf` output)
++        , "Unknown or invalid byte counts have no percentage" ~: do
++            forM_ [(0, 0), (10, 0), (10, -1), (-1, 100)] \(completed, total) -> do
++              output <- renderMessages [copyStart 1 downloadPath, copyProgress 1 completed total]
++              assertBool "package remains visible" (not (Text.null (downloadRow output)))
++              assertBool "no invented download percentage" (not ("%" `Text.isInfixOf` downloadRow output))
++        , "Byte progress boundaries" ~: do
++            forM_ [(0, 100, "[░░░░░░░░░░░░] 0%"), (100, 100, "[████████████] 100%"), (150, 100, "[████████████] 100%"), (maxBound, maxBound, "[████████████] 100%")] \(completed, total, expected) -> do
++              output <- renderMessages [copyStart 1 downloadPath, copyProgress 1 completed total]
++              assertBool "bounded bar without overflow" (expected `Text.isInfixOf` downloadRow output)
++        , "Progress belongs to the right package" ~: do
++            let otherPath = StorePath "60zb5dndaw1fzir3s69sy3xhy19gll1p" "other-package"
++            output <- renderMessages [copyStart 1 downloadPath, copyStart 2 otherPath, copyProgress 1 25 100, copyProgress 2 75 100]
++            assertBool "first package" ("25%" `Text.isInfixOf` downloadRow output)
++            assertBool "second package" (any (\row -> "75%" `Text.isInfixOf` row && "other-package" `Text.isInfixOf` row) (Text.lines output))
++        , "New copy does not inherit stale progress" ~: do
++            output <- renderMessages [copyStart 1 downloadPath, copyProgress 1 100 100, JSON.Stop (JSON.MkStopAction (JSON.MkId 1)), copyStart 2 downloadPath]
++            assertBool "no stale percentage" (not ("%" `Text.isInfixOf` downloadRow output))
++        , "Completed downloads advance the task bar" ~: do
++            output <- renderMessages [copyStart 1 downloadPath, copyProgress 1 100 100, JSON.Stop (JSON.MkStopAction (JSON.MkId 1))]
++            assertBool "completed task" ("Tasks [████████████] 100% · 1/1 completed" `Text.isInfixOf` output)
++            assertBool "completed copy leaves active downloads" (not ("Downloads (NAR bytes)" `Text.isInfixOf` output))
++        , "Failures never look like successful completion" ~: do
++            initial <- State.initalStateFromBuildPlatform Nothing
++            let (drvId, nomState) = runState (State.getDerivationId (Derivation downloadPath)) initial
++                failed = State.MkBuildInfo 0 Localhost Strict.Nothing Strict.Nothing (State.MkBuildFail 1 (ExitCode 1))
++                summary = nomState.fullSummary
++            output <- renderState nomState{State.fullSummary = summary{State.failedBuilds = CMap.insert drvId failed mempty}}
++            assertBool "failed task stays in denominator" ("0/1 completed · 1 failed" `Text.isInfixOf` output)
++        , "No tasks means no progress bar" ~: do
++            output <- renderMessages []
++            assertBool "no empty task bar" (not ("Tasks" `Text.isInfixOf` output))
++        , "Parse Plan" ~: do
+             (rest, result) <-
+               assertOldStyleParse
+                 "these derivations will be built:\n  /nix/store/7n05q79qhrgvnfmvv2v3cnj3yqf4d1hf-haskell-language-server-0.4.0.0.drv\nthese paths will be fetched (134.19 MiB download, 1863.82 MiB unpacked):\n  /nix/store/60zb5dndaw1fzir3s69sy3xhy19gll1p-ghc-8.8.2\ngarbage"
