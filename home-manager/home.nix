@@ -99,11 +99,15 @@
       })
     ];
 
-  home.file.".config/JetBrains/IdeaIC2025.2/idea64.vmoptions".text = ''
-    -Dawt.toolkit.name=WLToolkit
-    -Xms128m
-    -Xmx2000m
-  '';
+  home.file.".config/JetBrains/IdeaIC2025.2/idea64.vmoptions" =
+    lib.mkIf (enableGui && pkgs.stdenv.hostPlatform.isAarch64)
+      {
+        text = ''
+          -Dawt.toolkit.name=WLToolkit
+          -Xms128m
+          -Xmx2000m
+        '';
+      };
 
   home.file = {
     ".cargo/config.toml".text = ''
