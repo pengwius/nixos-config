@@ -12,7 +12,7 @@
     ./rofi.nix
     ./spotify-player.nix
     ./ghostty.nix
-    ./vscode.nix
+    # ./vscode.nix
     ./zed.nix
     ./vesktop.nix
     #./gram.nix
