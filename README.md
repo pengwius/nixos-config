@@ -4,11 +4,11 @@
 
 This configuration is based on [@SailorSnow's](https://github.com/SailorSnoW) config. He did an amazing job with it - thank you!
 
-This repository contains my personal NixOS configuration for Apple Silicon (Asahi Linux) and an older Intel MacBook Air. Home Manager is integrated directly into the NixOS builds.
+This repository contains my personal NixOS configuration for Apple Silicon (Asahi Linux), an older Intel MacBook Air and a Lenovo Y50-70. Home Manager is integrated directly into the NixOS builds.
 
 I am using this configuration as my daily driver on a MacBook Air M1. It currently includes the experimental Asahi Linux branch with working external display support via USB-C.
 
-The `asahi` host uses ZFS for `/` and `/home`; `gruchot` targets ext4. Both use ZRAM and shared low-memory tuning.
+The `asahi` host uses ZFS for `/` and `/home`; `gruchot` and `y50-70` use ext4. All three use ZRAM; `asahi` and `gruchot` also share low-memory tuning.
 
 ## 🎨 Rice: Material Design 3 Expressive
 
@@ -25,7 +25,7 @@ The rice is based on **Material Design 3 Expressive**: a dark lavender palette, 
 | --- | --- | --- | --- | --- |
 | `asahi` | `rysiek` | MacBook Air M1 | `aarch64-linux`, asahi | ZFS + ZRAM |
 | `gruchot` | `gruchot` | MacBook Air 2014 Intel Core 2 Duo | `x86_64-linux` | ext4 + ZRAM |
-
+| `y50-70` | `y50-70` (working name) | Lenovo Y50-70, Intel + NVIDIA Optimus | `x86_64-linux` | ext4 + ZRAM |
 
 I will guide you through the entire installation process. Please note that these instructions **might not be complete**, as I wrote them from memory step-by-step and may have overlooked some details. If you encounter any issues, feel free to contact me on [Telegram](https://t.me/pengwius) or Matrix: `@pengwius:matrix.org`. I will be more than happy to help you and update the instructions.
 
@@ -214,7 +214,7 @@ zfs list
 
 ## 7. Swap / ZRAM
 
-ZRAM swap is enabled declaratively by `hosts/features/lowmem.nix` on both hosts; no manual swap creation is needed. **Do not create swap on a ZFS zvol**: it can deadlock under memory pressure. The current configuration uses ZRAM only.
+ZRAM swap is enabled declaratively by `hosts/features/lowmem.nix` on `asahi` and `gruchot`, and directly in `hosts/y50-70/configuration.nix` on the Lenovo; no manual swap creation is needed. **Do not create swap on a ZFS zvol**: it can deadlock under memory pressure. The current configuration uses ZRAM only.
 
 —
 
@@ -224,7 +224,7 @@ ZRAM swap is enabled declaratively by `hosts/features/lowmem.nix` on both hosts;
   ```bash
   nix flake check
   ```
-- Build a system closure without activating it (replace `asahi` with `gruchot` for Intel):
+- Build a system closure without activating it (use `gruchot` or `y50-70` for the Intel hosts):
   ```bash
   nix build --no-link .#nixosConfigurations.asahi.config.system.build.toplevel
   ```
@@ -247,9 +247,10 @@ ZRAM swap is enabled declaratively by `hosts/features/lowmem.nix` on both hosts;
 - `hosts/`
   - `asahi/`: Apple Silicon host settings and real hardware/filesystem configuration; imports the local Apple Silicon modules and ZFS feature.
   - `gruchot/`: Intel host settings and hardware template; imports neither Asahi nor ZFS.
+  - `y50-70/`: Lenovo host settings and supplied ext4/EFI hardware configuration; NVIDIA PRIME, Broadcom Wi-Fi and gaming support.
   - `common/`: Shared system base: boot, users, locale, Nix/Lix settings, packages, containers, console shim and rebuild helper.
   - `features/desktop.nix`: Shared GNOME applications/services, SDDM + SilentSDDM login screen, and base Stylix settings.
-  - `features/lowmem.nix`: ZRAM, OOM handling and memory/watchdog tuning for both hosts.
+  - `features/lowmem.nix`: ZRAM, OOM handling and memory/watchdog tuning for `asahi` and `gruchot`.
   - `features/zfs.nix`: ZFS kernel integration, snapshots, scrubbing, TRIM and ARC limit; used by `asahi`.
 - `home-manager/home.nix`: User entrypoint: module imports, CLI/GUI packages, Git, direnv and managed files. GUI imports/packages are gated by `enableGui`.
 - `home-manager/assets/`: Wallpapers and profile pictures, also installed into `~/Pictures/`.
@@ -257,7 +258,7 @@ ZRAM swap is enabled declaratively by `hosts/features/lowmem.nix` on both hosts;
   - `modules/nixos/default.nix`: NixOS module export set, currently empty; shared system configuration lives under `hosts/`.
   - `modules/home-manager/default.nix`: Home Manager module exports.
   - `modules/home-manager/noctalia/`: Authoritative shell settings, M3 Expressive palette, rail, widgets and lock screen.
-  - `modules/home-manager/gui/niri/`: Generated Niri configuration, bindings, window rules and window-memory helper.
+  - `modules/home-manager/gui/niri/`: Generated Niri configuration, bindings, window rules and window-memory helper. Display settings live in a separate `outputs.kdl`, overridable per host.
   - `modules/home-manager/gui/gnome.nix`: GTK 3/4 styling derived from Noctalia, fonts, icons, cursor, dconf and default file handlers.
   - `modules/home-manager/gui/firefox.nix` + `modules/home-manager/gui/firefox/material-expressive.css`: Firefox profile, vertical tabs and custom browser styling.
   - `modules/home-manager/gui/`: Other application settings, including Ghostty, Zed, VS Code and Vesktop.
@@ -273,7 +274,7 @@ ZRAM swap is enabled declaratively by `hosts/features/lowmem.nix` on both hosts;
 
 ## 🧩 Notable Choices
 
-- Desktop: Niri + Noctalia; SDDM with SilentSDDM as the login manager.
+- Desktop: Niri + Noctalia; SDDM with SilentSDDM as the login manager. The Lenovo additionally keeps KDE Plasma as its default session.
 - Applications: GNOME core apps and developer tools, plus Evolution, File Roller, backups and Software/Flatpak; Firefox, Ghostty, Zed, Vesktop, Materialfy and pixelGram.
 - Theming: M3 Expressive-inspired Noctalia, Firefox and GTK styling.
 - Podman: Enabled with Docker compatibility and `podman-compose`.

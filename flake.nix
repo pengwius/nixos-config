@@ -66,7 +66,6 @@
 
       # Helper na nowe hosty: podajesz katalog w ./hosts, architekturę,
       # usera Home Managera i czy ma być GUI — reszta sama.
-      # Host #3 to potem trzy linijki w nixosConfigurations.
       mkHost =
         {
           hostName,
@@ -142,6 +141,14 @@
         # gruchot (stary MacBook Intel, x86_64, ext4)
         gruchot = mkHost {
           hostName = "gruchot";
+          system = "x86_64-linux";
+          hmUser = "pengwius";
+          enableGui = true;
+        };
+
+        # Lenovo Y50-70 (robocza nazwa, Intel + NVIDIA, ext4)
+        y50-70 = mkHost {
+          hostName = "y50-70";
           system = "x86_64-linux";
           hmUser = "pengwius";
           enableGui = true;

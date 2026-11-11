@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   imports = [ ./window-memory.nix ];
 
@@ -22,6 +27,19 @@
       configPackages = [ pkgs.niri ];
     };
   };
+
+  xdg.configFile."niri/outputs.kdl".text = lib.mkDefault ''
+    output "eDP-1" {
+        scale 1.75
+        position x=0 y=0
+    }
+
+    output "DP-1" {
+        mode "3440x1440@144.000"
+        position x=1463 y=0
+        scale 1.0
+    }
+  '';
 
   xdg.configFile."niri/config.kdl".text = ''
     screenshot-path null
@@ -197,16 +215,7 @@
         open-floating true
     }
 
-    output "eDP-1" {
-        scale 1.75
-        position x=0 y=0
-    }
-
-    output "DP-1" {
-        mode "3440x1440@144.000"
-        position x=1463 y=0
-        scale 1.0
-    }
+    include "outputs.kdl"
 
     // Must stay last: these rules override earlier window rules.
     include optional=true "window-memory.kdl"
