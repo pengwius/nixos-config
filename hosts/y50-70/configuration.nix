@@ -19,7 +19,8 @@
   boot = {
     loader.efi.canTouchEfiVariables = true;
     loader.timeout = lib.mkForce 5;
-    kernelPackages = pkgs.linuxPackages_latest;
+    # Broadcom STA does not support the cfg80211 API changes in Linux 7.1.
+    kernelPackages = pkgs.linuxPackages_6_18;
     kernelModules = [ "wl" ];
     extraModulePackages = [ config.boot.kernelPackages.broadcom_sta ];
     blacklistedKernelModules = [
