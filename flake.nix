@@ -146,9 +146,9 @@
           enableGui = true;
         };
 
-        # Lenovo Y50-70 (robocza nazwa, Intel + NVIDIA, ext4)
-        y50-70 = mkHost {
-          hostName = "y50-70";
+        # Lenovo Y50-70
+        kosiarka = mkHost {
+          hostName = "kosiarka";
           system = "x86_64-linux";
           hmUser = "pengwius";
           enableGui = true;

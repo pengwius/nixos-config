@@ -43,7 +43,7 @@
       lib.optionals
         (
           !(builtins.elem osConfig.networking.hostName [
-            "y50-70"
+            "kosiarka"
             "gruchot"
           ])
         )

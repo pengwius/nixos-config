@@ -13,7 +13,7 @@
   ];
 
   _module.args.mainUser = "pengwius";
-  networking.hostName = "y50-70";
+  networking.hostName = "kosiarka";
   networking.networkmanager.enable = true;
 
   boot = {
