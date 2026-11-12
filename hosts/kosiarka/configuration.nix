@@ -103,6 +103,15 @@
 
   security.rtkit.enable = true;
   services = {
+    openssh = {
+      enable = true;
+      openFirewall = true;
+      settings = {
+        PasswordAuthentication = true;
+        PermitRootLogin = "no";
+        AllowUsers = [ "pengwius" ];
+      };
+    };
     desktopManager.plasma6.enable = true;
     displayManager.defaultSession = lib.mkForce "plasma";
     # Keep automatic DPI detection instead of the shared MacBook's forced 2x scale.
