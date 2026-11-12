@@ -4,6 +4,7 @@
   pkgs,
   pkgs-unstable,
   lib,
+  osConfig,
   enableGui,
   ...
 }:
@@ -54,7 +55,6 @@
       android-studio-tools
       kotlin
       android-tools
-      pkgs-unstable.opencode
       mold
       go
       gnupg
@@ -62,6 +62,12 @@
       cups
       proton-vpn-cli
     ]
+    ++ lib.optionals (
+      !(builtins.elem osConfig.networking.hostName [
+        "gruchot"
+        "kosiarka"
+      ])
+    ) [ pkgs-unstable.opencode ]
     ++ lib.optionals enableGui [
       # GUI — tylko hosty z desktopem (enableGui).
       pkgs-unstable.telegram-desktop
