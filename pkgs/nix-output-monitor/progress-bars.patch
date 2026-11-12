@@ -27,58 +27,102 @@
  targetRatio, defaultTreeMax :: Int
  targetRatio = 3 -- We divide by this, don‘t set this to zero.
  defaultTreeMax = 20
-@@ -174,6 +185,8 @@
+@@ -173,7 +184,7 @@
+             -- (not (IntMap.null interestingActivities) || isJust evalMessage, printInterestingActivities evalMessage interestingActivities)
              (not (Seq.null nixErrors), const errorDisplay)
            , (not (Seq.null nixTraces), const traceDisplay)
-           , (not (Seq.null forestRoots), buildsDisplay . snd)
-+          , (downloadsRunning > 0, downloadsDisplay . snd)
-+          , (totalTasks > 0, const tasksDisplay)
+-          , (not (Seq.null forestRoots), buildsDisplay . snd)
++          , (not (Seq.null forestRoots) || downloadsRunning > 0, buildsDisplay . snd)
            ]
      maxHeight = case maybeWindow of
        Just limit -> limit `div` targetRatio -- targetRatio is hardcoded to be bigger than zero.
-@@ -186,6 +199,21 @@
-         (printBuilds buildState hostNums maxHeight now)
-     errorDisplay = printErrors nixErrors maxHeight
-     traceDisplay = printTraces nixTraces maxHeight
-+    tasksDisplay =
-+      horizontal <> " Tasks " <> progressBar completedTasks totalTasks
-+        <> " · " <> show completedTasks <> "/" <> show totalTasks <> " completed"
-+        <> showCond (numFailedBuilds > 0) (markup red (" · " <> show numFailedBuilds <> " failed"))
-+    downloadsDisplay now =
-+      prependLines horizontal (vertical <> " ") (vertical <> " ")
-+        (" Downloads (NAR bytes):" :| (take maxHeight (downloadLine now <$> CMap.toList runningDownloads)
-+          <> showCond (downloadsRunning > maxHeight) ["… " <> show (downloadsRunning - maxHeight) <> " more downloads"]))
-+    downloadLine now (pathId, transfer) =
-+      let path = (evalState (getStorePathInfos pathId) buildState).name
-+          progressText = case Map.lookup (path, transfer.host) downloadProgress >>= Strict.toLazy of
-+            Just p | p.expected > 0 && p.done >= 0 ->
-+              progressBar p.done p.expected <> " · " <> mib p.done <> "/" <> mib p.expected <> " MiB NAR · "
-+            _ -> ""
-+       in unwords $ [down, progressText <> path.name] <> ifTimeDiffRelevant now transfer.start id
-   -- evalMessage = case evaluationState.lastFileName of
-   --   Strict.Just file_name -> Just ("Evaluated " <> show (evaluationState.count) <> " files, last one was '" <> file_name <> "'")
-   --   Strict.Nothing -> Nothing
-@@ -198,6 +226,16 @@
+@@ -198,12 +209,19 @@
    completedBuilds' = (.host) <$> completedBuilds
    failedBuilds' = (.host) <$> failedBuilds
    numFailedBuilds = CMap.size failedBuilds
 +  completedTasks = numCompletedBuilds + downloadsDone + uploadsDone
 +  totalTasks = totalBuilds + numFailedBuilds + downloadsDone + downloadsRunning + numPlannedDownloads + uploadsDone + uploadsRunning
++  tasksDisplay =
++    lowerleft <> horizontal <> " Tasks " <> progressBar completedTasks totalTasks
++      <> " · " <> show completedTasks <> "/" <> show totalTasks <> " completed"
++      <> showCond (numFailedBuilds > 0) (markup red (" · " <> show numFailedBuilds <> " failed"))
+   table time' =
+     prependLines
+       (stimes (3 :: Int) horizontal <> " ")
+       (vertical <> "    ")
+-      (lowerleft <> horizontal <> " " <> bigsum <> " ")
+-      $ printAlignedSep (innerTable `appendr` one (lastRow time'))
++      ((if totalTasks > 0 then leftT else lowerleft) <> horizontal <> " " <> bigsum <> " ")
++      (printAlignedSep (innerTable `appendr` one (lastRow time')))
++      <> showCond (totalTasks > 0) ("\n" <> tasksDisplay)
+   innerTable :: [NonEmpty Entry]
+   innerTable = fromMaybe (one (text "")) (nonEmpty headers) : showCond showHosts printHosts
+   headers =
+@@ -320,7 +338,7 @@
+   hostLabel color host = (if color then markup magenta else id) $ maybe (toText host) (("[" <>) . (<> "]") . show) (List.lookup host hostNums)
+   printBuildsWithTime :: Double -> NonEmpty Text
+   printBuildsWithTime now = (graphHeader :|) $ showForest $ fmap (fmap ($ now)) preparedPrintForest
+-  num_raw_roots = length forestRoots
++  num_raw_roots = length forestRoots + length extraDownloads
+   num_roots = length preparedPrintForest
+   graphTitle = markup bold "Dependency Graph"
+   graphHeader = " " <> graphHeaderInner <> ":"
+@@ -331,5 +349,28 @@
+   preparedPrintForest :: Forest (Double -> Text)
+-  preparedPrintForest = mapRootsTwigsAndLeafs (printTreeNode Root) (printTreeNode Twig) (printTreeNode Leaf) <$> buildForest
++  preparedPrintForest = (mapRootsTwigsAndLeafs (printTreeNode Root) (printTreeNode Twig) (printTreeNode Leaf) <$> buildForest) <> extraDownloads
++  shownPaths = foldMap (foldMap (CSet.fromFoldable . Map.elems . (.outputs))) buildForest
++  extraDownloads =
++    [ Node (\now -> unwords $ [markups [bold, yellow] (down <> " " <> running <> " " <> path.name)]
++        <> progressFor pathId transfer.host <> ifTimeDiffRelevant now transfer.start id) []
++    | (pathId, transfer) <- CMap.toList fullSummary.runningDownloads
++    , not (CSet.member pathId shownPaths)
++    , let path = (get' (getStorePathInfos pathId)).name
++    ]
 +  downloadProgress =
 +    Map.fromList
 +      [ ((path, host), status.progress)
 +      | status <- IntMap.elems activities
 +      , CopyPath path host Localhost <- [status.activity]
 +      ]
++  progressFor :: StorePathId -> Host -> [Text]
++  progressFor pathId host =
++    let path = (get' (getStorePathInfos pathId)).name
++     in case Map.lookup (path, host) downloadProgress >>= Strict.toLazy of
++          Just p | p.expected > 0 && p.done >= 0 ->
++            [progressBar p.done p.expected <> " · " <> mib p.done <> "/" <> mib p.expected <> " MiB NAR"]
++          _ -> []
 +  mib :: Int -> Text
 +  mib bytes = toText (printf "%.1f" (fromIntegral bytes / (1024 * 1024) :: Double) :: String)
-   table time' =
-     prependLines
-       (stimes (3 :: Int) horizontal <> " ")
+   printTreeNode :: TreeLocation -> DerivationInfo -> Double -> Text
+   printTreeNode location drvInfo =
+     let summary = showSummary drvInfo.dependencySummary
+@@ -463,6 +504,11 @@
+           Strict.toLazy $ activity_status.phase
+         drvName = appendDifferingPlatform nomState drvInfo drvInfo.name.storePath.name
+         downloadingOutputs = store_paths_in_map drvInfo.dependencySummary.runningDownloads
++        outputProgress = concat
++          [ (\bar -> if Map.size drvInfo.outputs > 1 then show output <> ": " <> bar else bar) <$> progressFor pathId transfer.host
++          | (output, pathId) <- Map.toList drvInfo.outputs
++          , Just transfer <- [CMap.lookup pathId drvInfo.dependencySummary.runningDownloads]
++          ]
+         uploadingOutputs = store_paths_in_map drvInfo.dependencySummary.runningUploads
+         plannedDownloads = store_paths_in drvInfo.dependencySummary.plannedDownloads
+         downloadedOutputs = store_paths_in_map drvInfo.dependencySummary.completedDownloads
+@@ -483,7 +529,7 @@
+                 , \now ->
+                     unwords
+                       $ markups [bold, yellow] (down <> " " <> running <> " " <> drvName)
+-                      : ( print_hosts_down True (hosts downloadingOutputs)
++                      : ( outputProgress <> print_hosts_down True (hosts downloadingOutputs)
+                             <> ifTimeDiffRelevant now (earliest_start downloadingOutputs) id
+                         )
+                 )
 --- a/test/Property.hs
 +++ b/test/Property.hs
-@@ -1,12 +1,22 @@
+@@ -1,12 +1,23 @@
 +import Control.Monad (foldM)
++import Data.Map.Strict qualified as Map
  import Data.Set (singleton)
 +import Data.Strict qualified as Strict
 +import Data.Text qualified as Text
@@ -100,7 +144,7 @@
  assertOldStyleParse :: ByteString -> IO (ByteString, NixOldStyleMessage)
  assertOldStyleParse input = do
    let res = parseOne parser input
-@@ -15,12 +25,73 @@
+@@ -15,12 +26,101 @@
    assertBool "parsing succeeds with an actual match" (isJust res')
    pure (t, Unsafe.fromJust res')
  
@@ -119,13 +163,28 @@
 +  pure $ stripANSICodes $ stateToText (MkConfig False False) nomState Nothing (now, nomState.startTime + 2)
 +
 +renderMessages :: [JSON.NixJSONMessage] -> IO Text
-+renderMessages messages = do
++renderMessages messages = renderState =<< stateFromMessages messages
++
++stateFromMessages :: [JSON.NixJSONMessage] -> IO State.NOMV1State
++stateFromMessages messages = do
 +  initial <- State.initalStateFromBuildPlatform Nothing
-+  nomState <- foldM (\old message -> do
++  foldM (\old message -> do
 +    ((errs, _), new) <- updateStateNixJSONMessage message old
 +    assertEqual "no update errors" [] errs
 +    pure (fromMaybe old new)) initial messages
-+  renderState nomState
++
++withDownloadTree :: State.NOMV1State -> State.NOMV1State
++withDownloadTree = execState do
++  pathId <- State.getStorePathId downloadPath
++  childId <- State.getDerivationId (Derivation downloadPath)
++  parentId <- State.getDerivationId (Derivation (StorePath "60zb5dndaw1fzir3s69sy3xhy19gll1p" "tree-root"))
++  modify' \s -> s
++    { State.forestRoots = one parentId
++    , State.derivationInfos =
++        CMap.adjust (\parent -> parent{State.inputDerivations = one (State.MkInputDerivation childId (one State.Out)), State.dependencySummary = s.fullSummary}) parentId
++          (CMap.adjust (\child -> child{State.outputs = Map.singleton State.Out pathId, State.dependencySummary = s.fullSummary}) childId s.derivationInfos)
++    , State.storePathInfos = CMap.adjust (\info -> info{State.producer = Strict.Just childId}) pathId s.storePathInfos
++    }
 +
 +downloadRow :: Text -> Text
 +downloadRow = Text.unlines . filter (Text.isInfixOf downloadPath.name) . Text.lines
@@ -140,6 +199,19 @@
 +            output <- renderMessages [copyStart 1 downloadPath, copyProgress 1 1048576 4194304]
 +            assertBool "quarter bar and NAR size" ("[███░░░░░░░░░] 25% · 1.0/4.0 MiB NAR" `Text.isInfixOf` downloadRow output)
 +            assertBool "running copy is not a completed task" ("0/1 completed" `Text.isInfixOf` output)
++            assertBool "standalone downloads use the graph" ("Dependency Graph" `Text.isInfixOf` output)
++        , "Download bar is inline in its dependency branch" ~: do
++            nomState <- stateFromMessages [copyStart 1 downloadPath, copyProgress 1 1048576 4194304]
++            output <- renderState (withDownloadTree nomState)
++            let rows = filter (Text.isInfixOf downloadPath.name) (Text.lines output)
++            assertEqual "package is not duplicated outside the tree" 1 (length rows)
++            assertBool "bar follows package name in a branch" (any (Text.isInfixOf (downloadPath.name <> " [███░░░░░░░░░] 25%")) rows && "┌─" `Text.isInfixOf` downloadRow output)
++            assertBool "no separate download panel" (not ("Downloads (NAR bytes)" `Text.isInfixOf` output))
++        , "Tasks is the last line below the summary" ~: do
++            output <- renderMessages [copyStart 1 downloadPath, copyProgress 1 25 100]
++            let lastLine = Text.takeWhileEnd (/= '\n') (Text.stripEnd output)
++            assertBool "task bar at the very bottom" ("┗━ Tasks " `Text.isPrefixOf` lastLine)
++            assertBool "summary is retained above it" ("∑" `Text.isInfixOf` Text.dropEnd (Text.length lastLine) output)
 +        , "Unknown or invalid byte counts have no percentage" ~: do
 +            forM_ [(0, 0), (10, 0), (10, -1), (-1, 100)] \(completed, total) -> do
 +              output <- renderMessages [copyStart 1 downloadPath, copyProgress 1 completed total]
@@ -160,7 +232,7 @@
 +        , "Completed downloads advance the task bar" ~: do
 +            output <- renderMessages [copyStart 1 downloadPath, copyProgress 1 100 100, JSON.Stop (JSON.MkStopAction (JSON.MkId 1))]
 +            assertBool "completed task" ("Tasks [████████████] 100% · 1/1 completed" `Text.isInfixOf` output)
-+            assertBool "completed copy leaves active downloads" (not ("Downloads (NAR bytes)" `Text.isInfixOf` output))
++            assertBool "completed copy leaves the active tree" (Text.null (downloadRow output))
 +        , "Failures never look like successful completion" ~: do
 +            initial <- State.initalStateFromBuildPlatform Nothing
 +            let (drvId, nomState) = runState (State.getDerivationId (Derivation downloadPath)) initial

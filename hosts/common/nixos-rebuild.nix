@@ -23,7 +23,7 @@ let
     fi
 
     # --no-reexec prevents the flake re-exec loop through this wrapper.
-    ${real}/bin/nixos-rebuild --no-reexec --log-format internal-json "$@" 2>&1 | ${pkgs.nix-output-monitor}/bin/nom --json
+    ${real}/bin/nixos-rebuild --no-reexec --log-format internal-json -v "$@" 2>&1 | ${pkgs.nix-output-monitor}/bin/nom --json
   '';
 in
 {
